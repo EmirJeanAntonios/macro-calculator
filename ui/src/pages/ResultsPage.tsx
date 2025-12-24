@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Download,
   Loader2,
@@ -15,8 +16,10 @@ import { macroService } from '../services/api';
 import MacroCard from '../components/MacroCard';
 import CalorieRing from '../components/CalorieRing';
 import SpecialDayCard from '../components/SpecialDayCard';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function ResultsPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [result, setResult] = useState<MacroResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,17 +38,17 @@ export default function ResultsPage() {
         if (response.success && response.data) {
           setResult(response.data);
         } else {
-          setError(response.error || 'Failed to load results');
+          setError(response.error || t('errors.loadFailed'));
         }
       } catch {
-        setError('An unexpected error occurred');
+        setError(t('errors.unexpected'));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchResult();
-  }, [id]);
+  }, [id, t]);
 
   const handleDownloadPdf = async () => {
     if (!id) return;
@@ -54,7 +57,7 @@ export default function ResultsPage() {
     try {
       await macroService.downloadPdf(id);
     } catch {
-      setError('Failed to download PDF');
+      setError(t('errors.pdfFailed'));
     } finally {
       setIsDownloading(false);
     }
@@ -79,7 +82,7 @@ export default function ResultsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 text-emerald-400 animate-spin" />
-          <p className="text-slate-400">Loading your results...</p>
+          <p className="text-slate-400">{t('history.loading')}</p>
         </div>
       </div>
     );
@@ -89,13 +92,13 @@ export default function ResultsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-400 text-xl mb-4">{error || 'Results not found'}</div>
+          <div className="text-red-400 text-xl mb-4">{error || t('errors.notFound')}</div>
           <Link
             to="/"
             className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
-            Start New Calculation
+            {t('app.newCalculation')}
           </Link>
         </div>
       </div>
@@ -114,7 +117,7 @@ export default function ResultsPage() {
               <Calculator className="w-6 h-6 text-emerald-400" />
             </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-              Macro Calculator
+              {t('app.title')}
             </h1>
           </Link>
 
@@ -124,15 +127,16 @@ export default function ResultsPage() {
               className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">New</span>
+              <span className="hidden sm:inline">{t('app.newCalculation')}</span>
             </Link>
             <Link
               to="/history"
               className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
             >
               <History className="w-4 h-4" />
-              <span className="hidden sm:inline">History</span>
+              <span className="hidden sm:inline">{t('app.history')}</span>
             </Link>
+            <LanguageSwitcher />
             <button
               onClick={handleDownloadPdf}
               disabled={isDownloading}
@@ -155,13 +159,13 @@ export default function ResultsPage() {
           {/* Hero Section */}
           <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold mb-2">
-              Your Personalized
+              {t('results.title')}
               <span className="block bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                Macro Plan
+                {t('results.macroPlan')}
               </span>
             </h2>
             <p className="text-slate-400">
-              Based on your profile and workout schedule
+              {t('results.basedOn')}
             </p>
           </div>
 
@@ -172,11 +176,11 @@ export default function ResultsPage() {
                 <Flame className="w-8 h-8 text-orange-400" />
               </div>
               <div>
-                <div className="text-sm text-slate-400">Basal Metabolic Rate</div>
+                <div className="text-sm text-slate-400">{t('results.bmr')}</div>
                 <div className="text-2xl font-bold text-white">
-                  {result.bmr} <span className="text-sm text-slate-500">kcal</span>
+                  {result.bmr} <span className="text-sm text-slate-500">{t('results.kcal')}</span>
                 </div>
-                <div className="text-xs text-slate-500">Calories burned at rest</div>
+                <div className="text-xs text-slate-500">{t('results.bmrDesc')}</div>
               </div>
             </div>
 
@@ -185,18 +189,18 @@ export default function ResultsPage() {
                 <Activity className="w-8 h-8 text-cyan-400" />
               </div>
               <div>
-                <div className="text-sm text-slate-400">Total Daily Energy</div>
+                <div className="text-sm text-slate-400">{t('results.tdee')}</div>
                 <div className="text-2xl font-bold text-white">
-                  {result.tdee} <span className="text-sm text-slate-500">kcal</span>
+                  {result.tdee} <span className="text-sm text-slate-500">{t('results.kcal')}</span>
                 </div>
-                <div className="text-xs text-slate-500">Including activity</div>
+                <div className="text-xs text-slate-500">{t('results.tdeeDesc')}</div>
               </div>
             </div>
           </div>
 
           {/* Main Macros Section */}
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
-            <h3 className="text-xl font-semibold mb-6 text-center">Daily Macro Targets</h3>
+            <h3 className="text-xl font-semibold mb-6 text-center">{t('results.dailyTargets')}</h3>
 
             <div className="flex flex-col md:flex-row items-center gap-8">
               {/* Calorie Ring */}
@@ -212,21 +216,21 @@ export default function ResultsPage() {
               {/* Macro Cards */}
               <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
                 <MacroCard
-                  label="Protein"
+                  label={t('results.protein')}
                   value={result.protein}
                   unit="g"
                   color="indigo"
                   percentage={percentages.protein}
                 />
                 <MacroCard
-                  label="Carbs"
+                  label={t('results.carbs')}
                   value={result.carbs}
                   unit="g"
                   color="amber"
                   percentage={percentages.carbs}
                 />
                 <MacroCard
-                  label="Fats"
+                  label={t('results.fats')}
                   value={result.fats}
                   unit="g"
                   color="rose"
@@ -239,15 +243,15 @@ export default function ResultsPage() {
             <div className="flex justify-center gap-6 mt-6 pt-6 border-t border-slate-700/50">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-indigo-500" />
-                <span className="text-sm text-slate-400">Protein (4 cal/g)</span>
+                <span className="text-sm text-slate-400">{t('results.protein')} (4 cal/g)</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-amber-500" />
-                <span className="text-sm text-slate-400">Carbs (4 cal/g)</span>
+                <span className="text-sm text-slate-400">{t('results.carbs')} (4 cal/g)</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-rose-500" />
-                <span className="text-sm text-slate-400">Fats (9 cal/g)</span>
+                <span className="text-sm text-slate-400">{t('results.fats')} (9 cal/g)</span>
               </div>
             </div>
           </div>
@@ -256,10 +260,10 @@ export default function ResultsPage() {
           {result.workoutDayCalories && result.restDayCalories && (
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-center">
-                Special Day Adjustments
+                {t('results.specialDays')}
               </h3>
               <p className="text-center text-slate-400 text-sm mb-6">
-                Optimize your nutrition based on your activity level each day
+                {t('results.specialDaysDesc')}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -284,14 +288,14 @@ export default function ResultsPage() {
           {/* Tips Section */}
           <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 rounded-2xl border border-emerald-500/20 p-6">
             <h3 className="text-lg font-semibold mb-4 text-emerald-400">
-              💡 Pro Tips
+              💡 {t('results.proTips')}
             </h3>
             <ul className="space-y-2 text-slate-300 text-sm">
-              <li>• Spread your protein intake across 4-5 meals for optimal absorption</li>
-              <li>• Focus on complex carbs like oats, rice, and sweet potatoes</li>
-              <li>• Include healthy fats from avocados, nuts, and olive oil</li>
-              <li>• Stay hydrated - aim for at least 2-3 liters of water daily</li>
-              <li>• Track your progress and adjust after 2-3 weeks if needed</li>
+              <li>• {t('results.tips.protein')}</li>
+              <li>• {t('results.tips.carbs')}</li>
+              <li>• {t('results.tips.fats')}</li>
+              <li>• {t('results.tips.hydration')}</li>
+              <li>• {t('results.tips.progress')}</li>
             </ul>
           </div>
 
@@ -302,7 +306,7 @@ export default function ResultsPage() {
               className="flex items-center justify-center gap-2 px-8 py-4 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
             >
               <RefreshCw className="w-5 h-5" />
-              New Calculation
+              {t('app.newCalculation')}
             </Link>
             <button
               onClick={handleDownloadPdf}
@@ -314,7 +318,7 @@ export default function ResultsPage() {
               ) : (
                 <Download className="w-5 h-5" />
               )}
-              Download PDF Report
+              {t('results.downloadPdf')}
             </button>
           </div>
         </div>
@@ -322,7 +326,7 @@ export default function ResultsPage() {
 
       {/* Footer */}
       <footer className="py-6 px-8 border-t border-white/10 text-center text-slate-500 text-sm">
-        <p>Macro Calculator — Your personalized nutrition guide</p>
+        <p>{t('app.title')} — {t('app.subtitle')}</p>
       </footer>
     </div>
   );

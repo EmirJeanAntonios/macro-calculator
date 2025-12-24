@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, Scale, Ruler, Target } from 'lucide-react';
 import type { UserInput, WeightUnit, HeightUnit } from '../types';
 
@@ -8,6 +9,7 @@ interface UserInputFormProps {
 }
 
 export default function UserInputForm({ onSubmit, initialData }: UserInputFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<UserInput>({
     age: initialData?.age || 25,
     gender: initialData?.gender || 'male',
@@ -35,15 +37,15 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
     const height = parseFloat(inputValues.height) || 0;
 
     if (age < 13 || age > 120) {
-      newErrors.age = 'Age must be between 13 and 120';
+      newErrors.age = t('form.validation.ageRange');
     }
 
     if (weight <= 0 || weight > 700) {
-      newErrors.weight = 'Please enter a valid weight';
+      newErrors.weight = t('form.validation.validWeight');
     }
 
     if (height <= 0 || height > 300) {
-      newErrors.height = 'Please enter a valid height';
+      newErrors.height = t('form.validation.validHeight');
     }
 
     setErrors(newErrors);
@@ -88,7 +90,7 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
             <User className="w-4 h-4 text-emerald-400" />
-            Age
+            {t('form.age')}
           </label>
           <input
             type="number"
@@ -99,7 +101,7 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
                 ? 'border-red-500 focus:ring-red-500/50'
                 : 'border-slate-700 focus:ring-emerald-500/50 focus:border-emerald-500'
             }`}
-            placeholder="Enter your age"
+            placeholder={t('form.enterAge')}
             min={13}
             max={120}
           />
@@ -110,18 +112,18 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
             <User className="w-4 h-4 text-cyan-400" />
-            Biological Gender
+            {t('form.gender')}
           </label>
           <div className="grid grid-cols-2 gap-3">
             <GenderButton
               selected={formData.gender === 'male'}
               onClick={() => updateField('gender', 'male')}
-              label="Male"
+              label={t('form.male')}
             />
             <GenderButton
               selected={formData.gender === 'female'}
               onClick={() => updateField('gender', 'female')}
-              label="Female"
+              label={t('form.female')}
             />
           </div>
         </div>
@@ -131,7 +133,7 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
       <div className="space-y-2">
         <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
           <Scale className="w-4 h-4 text-indigo-400" />
-          Weight
+          {t('form.weight')}
         </label>
         <div className="flex gap-3">
           <input
@@ -143,7 +145,7 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
                 ? 'border-red-500 focus:ring-red-500/50'
                 : 'border-slate-700 focus:ring-emerald-500/50 focus:border-emerald-500'
             }`}
-            placeholder="Enter your weight"
+            placeholder={t('form.enterWeight')}
             step="0.1"
           />
           <UnitToggle
@@ -162,7 +164,7 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
       <div className="space-y-2">
         <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
           <Ruler className="w-4 h-4 text-amber-400" />
-          Height
+          {t('form.height')}
         </label>
         <div className="flex gap-3">
           <input
@@ -174,7 +176,7 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
                 ? 'border-red-500 focus:ring-red-500/50'
                 : 'border-slate-700 focus:ring-emerald-500/50 focus:border-emerald-500'
             }`}
-            placeholder="Enter your height"
+            placeholder={t('form.enterHeight')}
             step="0.1"
           />
           <UnitToggle
@@ -193,28 +195,28 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
       <div className="space-y-2">
         <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
           <Target className="w-4 h-4 text-rose-400" />
-          Your Goal
+          {t('form.goal')}
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <GoalButton
             selected={formData.goal === 'weight_loss'}
             onClick={() => updateField('goal', 'weight_loss')}
-            label="Weight Loss"
-            description="Calorie deficit"
+            label={t('form.weightLoss')}
+            description={t('form.calorieDeficit')}
             color="rose"
           />
           <GoalButton
             selected={formData.goal === 'maintenance'}
             onClick={() => updateField('goal', 'maintenance')}
-            label="Maintenance"
-            description="Maintain weight"
+            label={t('form.maintenance')}
+            description={t('form.balancedDiet')}
             color="amber"
           />
           <GoalButton
             selected={formData.goal === 'muscle_gain'}
             onClick={() => updateField('goal', 'muscle_gain')}
-            label="Muscle Gain"
-            description="Calorie surplus"
+            label={t('form.muscleGain')}
+            description={t('form.calorieSurplus')}
             color="emerald"
           />
         </div>
@@ -225,7 +227,7 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
         type="submit"
         className="w-full py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/25"
       >
-        Continue to Workout Schedule
+        {t('form.continue')}
       </button>
     </form>
   );
@@ -330,4 +332,3 @@ function GoalButton({
     </button>
   );
 }
-

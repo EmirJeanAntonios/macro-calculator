@@ -1,0 +1,148 @@
+{
+  "app": {
+    "title": "Macro Calculator",
+    "subtitle": "Calculate your perfect nutrition plan",
+    "newCalculation": "New Calculation",
+    "history": "History"
+  },
+  "home": {
+    "tellUs": "Tell Us About Yourself",
+    "enterDetails": "Enter your details to get personalized macro recommendations",
+    "workoutSchedule": "Your Workout Schedule",
+    "setWorkoutPlan": "Set your weekly workout plan to optimize your nutrition",
+    "calculating": "Calculating your macros..."
+  },
+  "form": {
+    "age": "Age",
+    "enterAge": "Enter your age",
+    "gender": "Biological Gender",
+    "male": "Male",
+    "female": "Female",
+    "weight": "Weight",
+    "enterWeight": "Enter your weight",
+    "height": "Height",
+    "enterHeight": "Enter your height",
+    "goal": "Your Goal",
+    "weightLoss": "Weight Loss",
+    "calorieDeficit": "Calorie deficit",
+    "maintenance": "Maintenance",
+    "balancedDiet": "Balanced diet",
+    "muscleGain": "Muscle Gain",
+    "calorieSurplus": "Calorie surplus",
+    "continue": "Continue",
+    "validation": {
+      "ageRange": "Age must be between 13 and 120",
+      "validWeight": "Please enter a valid weight",
+      "validHeight": "Please enter a valid height"
+    }
+  },
+  "calendar": {
+    "title": "Weekly Workout Calendar",
+    "description": "Click on a day to set your workout type and duration",
+    "back": "Back",
+    "calculateMacros": "Calculate My Macros",
+    "addWorkout": "Add another workout",
+    "duration": "Duration",
+    "hours": "hours",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "workouts": {
+      "rest": "Rest Day",
+      "cardio": "Cardio",
+      "strength": "Strength",
+      "hiit": "HIIT",
+      "yoga": "Yoga",
+      "sports": "Sports",
+      "running": "Running",
+      "cycling": "Cycling",
+      "swimming": "Swimming",
+      "crossfit": "CrossFit",
+      "pilates": "Pilates",
+      "boxing": "Boxing",
+      "martial_arts": "Martial Arts",
+      "dance": "Dance",
+      "climbing": "Climbing",
+      "walking": "Walking",
+      "other": "Other"
+    }
+  },
+  "results": {
+    "title": "Your Personalized",
+    "macroPlan": "Macro Plan",
+    "basedOn": "Based on your profile and workout schedule",
+    "bmr": "Basal Metabolic Rate",
+    "bmrDesc": "Calories burned at rest",
+    "tdee": "Total Daily Energy",
+    "tdeeDesc": "Including activity",
+    "dailyTargets": "Daily Macro Targets",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fats": "Fats",
+    "calories": "Calories",
+    "kcal": "kcal",
+    "specialDays": "Special Day Adjustments",
+    "specialDaysDesc": "Optimize your nutrition based on your activity level each day",
+    "workoutDay": "Workout Day",
+    "restDay": "Rest Day",
+    "moreCalories": "more calories",
+    "fewerCalories": "fewer calories",
+    "downloadPdf": "Download PDF Report",
+    "proTips": "Pro Tips",
+    "tips": {
+      "protein": "Spread your protein intake across 4-5 meals for optimal absorption",
+      "carbs": "Focus on complex carbs like oats, rice, and sweet potatoes",
+      "fats": "Include healthy fats from avocados, nuts, and olive oil",
+      "hydration": "Stay hydrated - aim for at least 2-3 liters of water daily",
+      "progress": "Track your progress and adjust after 2-3 weeks if needed"
+    }
+  },
+  "history": {
+    "title": "Calculation History",
+    "subtitle": "View your previous macro calculations",
+    "loading": "Loading your history...",
+    "noResults": "No calculations yet",
+    "startFirst": "Start by creating your first macro calculation",
+    "createCalculation": "Create Calculation",
+    "tryAgain": "Try Again",
+    "goals": {
+      "weight_loss": "Weight Loss",
+      "muscle_gain": "Muscle Gain",
+      "maintenance": "Maintenance"
+    }
+  },
+  "steps": {
+    "yourInfo": "Your Info",
+    "workoutSchedule": "Workout Schedule",
+    "results": "Results"
+  },
+  "errors": {
+    "calculationFailed": "Failed to calculate macros",
+    "unexpected": "An unexpected error occurred. Please try again.",
+    "fetchFailed": "Failed to fetch results",
+    "loadFailed": "Failed to load results",
+    "notFound": "Results not found",
+    "pdfFailed": "Failed to download PDF"
+  },
+  "language": {
+    "select": "Language",
+    "en": "English",
+    "es": "Español",
+    "tr": "Türkçe",
+    "fr": "Français"
+  }
+}
+

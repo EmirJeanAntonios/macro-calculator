@@ -1,0 +1,148 @@
+{
+  "app": {
+    "title": "Calculateur de Macros",
+    "subtitle": "Calculez votre plan nutritionnel parfait",
+    "newCalculation": "Nouveau Calcul",
+    "history": "Historique"
+  },
+  "home": {
+    "tellUs": "Parlez-nous de Vous",
+    "enterDetails": "Entrez vos informations pour obtenir des recommandations personnalisées de macros",
+    "workoutSchedule": "Votre Programme d'Entraînement",
+    "setWorkoutPlan": "Définissez votre programme d'entraînement hebdomadaire pour optimiser votre nutrition",
+    "calculating": "Calcul de vos macros..."
+  },
+  "form": {
+    "age": "Âge",
+    "enterAge": "Entrez votre âge",
+    "gender": "Sexe Biologique",
+    "male": "Homme",
+    "female": "Femme",
+    "weight": "Poids",
+    "enterWeight": "Entrez votre poids",
+    "height": "Taille",
+    "enterHeight": "Entrez votre taille",
+    "goal": "Votre Objectif",
+    "weightLoss": "Perte de Poids",
+    "calorieDeficit": "Déficit calorique",
+    "maintenance": "Maintien",
+    "balancedDiet": "Régime équilibré",
+    "muscleGain": "Prise de Muscle",
+    "calorieSurplus": "Surplus calorique",
+    "continue": "Continuer",
+    "validation": {
+      "ageRange": "L'âge doit être entre 13 et 120",
+      "validWeight": "Veuillez entrer un poids valide",
+      "validHeight": "Veuillez entrer une taille valide"
+    }
+  },
+  "calendar": {
+    "title": "Calendrier d'Entraînement Hebdomadaire",
+    "description": "Cliquez sur un jour pour définir votre type et durée d'entraînement",
+    "back": "Retour",
+    "calculateMacros": "Calculer Mes Macros",
+    "addWorkout": "Ajouter un autre entraînement",
+    "duration": "Durée",
+    "hours": "heures",
+    "days": {
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche",
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Jeu",
+      "fri": "Ven",
+      "sat": "Sam",
+      "sun": "Dim"
+    },
+    "workouts": {
+      "rest": "Jour de Repos",
+      "cardio": "Cardio",
+      "strength": "Musculation",
+      "hiit": "HIIT",
+      "yoga": "Yoga",
+      "sports": "Sports",
+      "running": "Course",
+      "cycling": "Cyclisme",
+      "swimming": "Natation",
+      "crossfit": "CrossFit",
+      "pilates": "Pilates",
+      "boxing": "Boxe",
+      "martial_arts": "Arts Martiaux",
+      "dance": "Danse",
+      "climbing": "Escalade",
+      "walking": "Marche",
+      "other": "Autre"
+    }
+  },
+  "results": {
+    "title": "Votre Plan de Macros",
+    "macroPlan": "Personnalisé",
+    "basedOn": "Basé sur votre profil et programme d'entraînement",
+    "bmr": "Métabolisme de Base",
+    "bmrDesc": "Calories brûlées au repos",
+    "tdee": "Dépense Énergétique Totale",
+    "tdeeDesc": "Activité incluse",
+    "dailyTargets": "Objectifs Quotidiens de Macros",
+    "protein": "Protéines",
+    "carbs": "Glucides",
+    "fats": "Lipides",
+    "calories": "Calories",
+    "kcal": "kcal",
+    "specialDays": "Ajustements Jours Spéciaux",
+    "specialDaysDesc": "Optimisez votre nutrition selon votre niveau d'activité chaque jour",
+    "workoutDay": "Jour d'Entraînement",
+    "restDay": "Jour de Repos",
+    "moreCalories": "calories en plus",
+    "fewerCalories": "calories en moins",
+    "downloadPdf": "Télécharger le Rapport PDF",
+    "proTips": "Conseils Pro",
+    "tips": {
+      "protein": "Répartissez votre apport en protéines sur 4-5 repas pour une absorption optimale",
+      "carbs": "Privilégiez les glucides complexes comme l'avoine, le riz et les patates douces",
+      "fats": "Incluez des graisses saines provenant d'avocats, noix et huile d'olive",
+      "hydration": "Restez hydraté - visez au moins 2-3 litres d'eau par jour",
+      "progress": "Suivez vos progrès et ajustez après 2-3 semaines si nécessaire"
+    }
+  },
+  "history": {
+    "title": "Historique des Calculs",
+    "subtitle": "Consultez vos calculs de macros précédents",
+    "loading": "Chargement de votre historique...",
+    "noResults": "Aucun calcul pour le moment",
+    "startFirst": "Commencez par créer votre premier calcul de macros",
+    "createCalculation": "Créer un Calcul",
+    "tryAgain": "Réessayer",
+    "goals": {
+      "weight_loss": "Perte de Poids",
+      "muscle_gain": "Prise de Muscle",
+      "maintenance": "Maintien"
+    }
+  },
+  "steps": {
+    "yourInfo": "Vos Infos",
+    "workoutSchedule": "Entraînement",
+    "results": "Résultats"
+  },
+  "errors": {
+    "calculationFailed": "Échec du calcul des macros",
+    "unexpected": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "fetchFailed": "Échec de la récupération des résultats",
+    "loadFailed": "Échec du chargement des résultats",
+    "notFound": "Résultats non trouvés",
+    "pdfFailed": "Échec du téléchargement du PDF"
+  },
+  "language": {
+    "select": "Langue",
+    "en": "English",
+    "es": "Español",
+    "tr": "Türkçe",
+    "fr": "Français"
+  }
+}
+

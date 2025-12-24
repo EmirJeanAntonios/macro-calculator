@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Dumbbell,
@@ -29,143 +30,32 @@ interface WorkoutCalendarProps {
   onBack: () => void;
 }
 
-const DAYS: { key: DayOfWeek; label: string; short: string }[] = [
-  { key: 'monday', label: 'Monday', short: 'Mon' },
-  { key: 'tuesday', label: 'Tuesday', short: 'Tue' },
-  { key: 'wednesday', label: 'Wednesday', short: 'Wed' },
-  { key: 'thursday', label: 'Thursday', short: 'Thu' },
-  { key: 'friday', label: 'Friday', short: 'Fri' },
-  { key: 'saturday', label: 'Saturday', short: 'Sat' },
-  { key: 'sunday', label: 'Sunday', short: 'Sun' },
-];
-
-const WORKOUT_TYPES: {
+const WORKOUT_TYPE_CONFIG: {
   type: WorkoutType;
-  label: string;
   icon: React.ElementType;
   color: string;
   bgColor: string;
 }[] = [
-  {
-    type: 'rest',
-    label: 'Rest',
-    icon: Moon,
-    color: 'text-slate-400',
-    bgColor: 'bg-slate-500/20',
-  },
-  {
-    type: 'strength',
-    label: 'Strength',
-    icon: Dumbbell,
-    color: 'text-blue-400',
-    bgColor: 'bg-blue-500/20',
-  },
-  {
-    type: 'cardio',
-    label: 'Cardio',
-    icon: Heart,
-    color: 'text-rose-400',
-    bgColor: 'bg-rose-500/20',
-  },
-  {
-    type: 'running',
-    label: 'Running',
-    icon: Footprints,
-    color: 'text-orange-400',
-    bgColor: 'bg-orange-500/20',
-  },
-  {
-    type: 'cycling',
-    label: 'Cycling',
-    icon: Bike,
-    color: 'text-lime-400',
-    bgColor: 'bg-lime-500/20',
-  },
-  {
-    type: 'swimming',
-    label: 'Swimming',
-    icon: Waves,
-    color: 'text-cyan-400',
-    bgColor: 'bg-cyan-500/20',
-  },
-  {
-    type: 'hiit',
-    label: 'HIIT',
-    icon: Zap,
-    color: 'text-amber-400',
-    bgColor: 'bg-amber-500/20',
-  },
-  {
-    type: 'crossfit',
-    label: 'CrossFit',
-    icon: Flame,
-    color: 'text-red-400',
-    bgColor: 'bg-red-500/20',
-  },
-  {
-    type: 'yoga',
-    label: 'Yoga',
-    icon: Sparkles,
-    color: 'text-purple-400',
-    bgColor: 'bg-purple-500/20',
-  },
-  {
-    type: 'pilates',
-    label: 'Pilates',
-    icon: PersonStanding,
-    color: 'text-pink-400',
-    bgColor: 'bg-pink-500/20',
-  },
-  {
-    type: 'boxing',
-    label: 'Boxing',
-    icon: Hand,
-    color: 'text-yellow-400',
-    bgColor: 'bg-yellow-500/20',
-  },
-  {
-    type: 'martial_arts',
-    label: 'Martial Arts',
-    icon: Swords,
-    color: 'text-indigo-400',
-    bgColor: 'bg-indigo-500/20',
-  },
-  {
-    type: 'dance',
-    label: 'Dance',
-    icon: Music,
-    color: 'text-fuchsia-400',
-    bgColor: 'bg-fuchsia-500/20',
-  },
-  {
-    type: 'climbing',
-    label: 'Climbing',
-    icon: Mountain,
-    color: 'text-stone-400',
-    bgColor: 'bg-stone-500/20',
-  },
-  {
-    type: 'walking',
-    label: 'Walking',
-    icon: TreePine,
-    color: 'text-green-400',
-    bgColor: 'bg-green-500/20',
-  },
-  {
-    type: 'sports',
-    label: 'Sports',
-    icon: Trophy,
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/20',
-  },
-  {
-    type: 'other',
-    label: 'Other',
-    icon: MoreHorizontal,
-    color: 'text-teal-400',
-    bgColor: 'bg-teal-500/20',
-  },
+  { type: 'rest', icon: Moon, color: 'text-slate-400', bgColor: 'bg-slate-500/20' },
+  { type: 'strength', icon: Dumbbell, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  { type: 'cardio', icon: Heart, color: 'text-rose-400', bgColor: 'bg-rose-500/20' },
+  { type: 'running', icon: Footprints, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
+  { type: 'cycling', icon: Bike, color: 'text-lime-400', bgColor: 'bg-lime-500/20' },
+  { type: 'swimming', icon: Waves, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
+  { type: 'hiit', icon: Zap, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+  { type: 'crossfit', icon: Flame, color: 'text-red-400', bgColor: 'bg-red-500/20' },
+  { type: 'yoga', icon: Sparkles, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+  { type: 'pilates', icon: PersonStanding, color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
+  { type: 'boxing', icon: Hand, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
+  { type: 'martial_arts', icon: Swords, color: 'text-indigo-400', bgColor: 'bg-indigo-500/20' },
+  { type: 'dance', icon: Music, color: 'text-fuchsia-400', bgColor: 'bg-fuchsia-500/20' },
+  { type: 'climbing', icon: Mountain, color: 'text-stone-400', bgColor: 'bg-stone-500/20' },
+  { type: 'walking', icon: TreePine, color: 'text-green-400', bgColor: 'bg-green-500/20' },
+  { type: 'sports', icon: Trophy, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
+  { type: 'other', icon: MoreHorizontal, color: 'text-teal-400', bgColor: 'bg-teal-500/20' },
 ];
+
+const DAY_KEYS: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 interface DayWorkoutItem {
   id: string;
@@ -176,6 +66,8 @@ interface DayWorkoutItem {
 type DaySchedule = DayWorkoutItem[];
 
 export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarProps) {
+  const { t } = useTranslation();
+  
   const [schedule, setSchedule] = useState<Record<DayOfWeek, DaySchedule>>({
     monday: [],
     tuesday: [],
@@ -192,6 +84,21 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
   const [newWorkoutHours, setNewWorkoutHours] = useState(1);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
+
+  const getWorkoutLabel = (type: WorkoutType) => t(`calendar.workouts.${type}`);
+  const getDayLabel = (day: DayOfWeek) => t(`calendar.days.${day}`);
+  const getDayShort = (day: DayOfWeek) => {
+    const shortMap: Record<DayOfWeek, string> = {
+      monday: 'mon',
+      tuesday: 'tue',
+      wednesday: 'wed',
+      thursday: 'thu',
+      friday: 'fri',
+      saturday: 'sat',
+      sunday: 'sun',
+    };
+    return t(`calendar.days.${shortMap[day]}`);
+  };
 
   const addWorkout = (day: DayOfWeek) => {
     const newWorkout: DayWorkoutItem = {
@@ -218,17 +125,15 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
   const handleSubmit = () => {
     const workouts: Workout[] = [];
     
-    DAYS.forEach(({ key }) => {
+    DAY_KEYS.forEach((key) => {
       const dayWorkouts = schedule[key];
       if (dayWorkouts.length === 0) {
-        // Add a rest day if no workouts
         workouts.push({
           day: key,
           type: 'rest',
           hours: 0,
         });
       } else {
-        // Add each workout for the day
         dayWorkouts.forEach((w) => {
           workouts.push({
             day: key,
@@ -243,7 +148,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
   };
 
   const getWorkoutInfo = (type: WorkoutType) => {
-    return WORKOUT_TYPES.find((w) => w.type === type) || WORKOUT_TYPES[0];
+    return WORKOUT_TYPE_CONFIG.find((w) => w.type === type) || WORKOUT_TYPE_CONFIG[0];
   };
 
   const workoutDays = Object.values(schedule).filter((d) => d.length > 0).length;
@@ -257,7 +162,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
     <div className="space-y-6">
       {/* Weekly Overview */}
       <div className="grid grid-cols-7 gap-2">
-        {DAYS.map(({ key, short }) => {
+        {DAY_KEYS.map((key) => {
           const dayWorkouts = schedule[key];
           const hasWorkouts = dayWorkouts.length > 0;
           const isSelected = selectedDay === key;
@@ -275,7 +180,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
                   : 'hover:bg-slate-700/30'
               } ${hasWorkouts ? primaryWorkout.bgColor : 'bg-slate-500/10'}`}
             >
-              <span className="text-xs text-slate-400 mb-1">{short}</span>
+              <span className="text-xs text-slate-400 mb-1">{getDayShort(key)}</span>
               <div className={`p-2 rounded-lg ${primaryWorkout.bgColor} relative`}>
                 <Icon className={`w-5 h-5 ${primaryWorkout.color}`} />
                 {dayWorkouts.length > 1 && (
@@ -299,7 +204,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
         <div className="bg-slate-700/30 rounded-xl p-5 border border-slate-600/50 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold capitalize">
-              {DAYS.find((d) => d.key === selectedDay)?.label}
+              {getDayLabel(selectedDay)}
             </h3>
             <button
               type="button"
@@ -313,7 +218,6 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
           {/* Current Workouts List */}
           {schedule[selectedDay].length > 0 && (
             <div className="space-y-2 mb-4">
-              <label className="block text-sm text-slate-400">Workouts for this day</label>
               {schedule[selectedDay].map((workout) => {
                 const info = getWorkoutInfo(workout.type);
                 const Icon = info.icon;
@@ -324,7 +228,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
                   >
                     <div className="flex items-center gap-3">
                       <Icon className={`w-5 h-5 ${info.color}`} />
-                      <span className={`font-medium ${info.color}`}>{info.label}</span>
+                      <span className={`font-medium ${info.color}`}>{getWorkoutLabel(workout.type)}</span>
                       <span className="text-slate-400 text-sm flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {workout.hours}h
@@ -346,9 +250,8 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
           {/* Add Workout Form */}
           {addingWorkout ? (
             <div className="space-y-4 p-4 bg-slate-800/50 rounded-xl">
-              <label className="block text-sm text-slate-400">Select workout type</label>
               <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-40 overflow-y-auto pr-1">
-                {WORKOUT_TYPES.filter((w) => w.type !== 'rest').map(({ type, label, icon: Icon, color, bgColor }) => {
+                {WORKOUT_TYPE_CONFIG.filter((w) => w.type !== 'rest').map(({ type, icon: Icon, color, bgColor }) => {
                   const isActive = newWorkoutType === type;
                   return (
                     <button
@@ -363,7 +266,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
                     >
                       <Icon className={`w-4 h-4 mb-1 ${isActive ? color : 'text-slate-500'}`} />
                       <span className={`text-xs ${isActive ? color : 'text-slate-500'}`}>
-                        {label}
+                        {getWorkoutLabel(type)}
                       </span>
                     </button>
                   );
@@ -374,7 +277,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
               <div>
                 <label className="flex items-center gap-2 text-sm text-slate-400 mb-2">
                   <Clock className="w-4 h-4" />
-                  Duration (hours)
+                  {t('calendar.duration')} ({t('calendar.hours')})
                 </label>
                 <div className="flex items-center gap-3">
                   <input
@@ -399,14 +302,14 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
                   onClick={() => setAddingWorkout(false)}
                   className="flex-1 py-2 text-sm text-slate-400 hover:text-white transition-colors border border-slate-600 rounded-lg"
                 >
-                  Cancel
+                  {t('calendar.back')}
                 </button>
                 <button
                   type="button"
                   onClick={() => addWorkout(selectedDay)}
                   className="flex-1 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
                 >
-                  Add Workout
+                  {t('calendar.addWorkout')}
                 </button>
               </div>
             </div>
@@ -417,7 +320,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
               className="w-full py-3 border-2 border-dashed border-slate-600 hover:border-emerald-500 text-slate-400 hover:text-emerald-400 rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
-              Add Workout
+              {t('calendar.addWorkout')}
             </button>
           )}
         </div>
@@ -427,21 +330,21 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-slate-700/30 rounded-xl p-4 text-center">
           <div className="text-3xl font-bold text-emerald-400">{workoutDays}</div>
-          <div className="text-sm text-slate-400">Active Days</div>
+          <div className="text-sm text-slate-400">{t('calendar.days.monday').split(' ')[0]}s</div>
         </div>
         <div className="bg-slate-700/30 rounded-xl p-4 text-center">
           <div className="text-3xl font-bold text-cyan-400">{totalWorkouts}</div>
-          <div className="text-sm text-slate-400">Total Workouts</div>
+          <div className="text-sm text-slate-400">Workouts</div>
         </div>
         <div className="bg-slate-700/30 rounded-xl p-4 text-center">
           <div className="text-3xl font-bold text-amber-400">{totalHours}</div>
-          <div className="text-sm text-slate-400">Total Hours</div>
+          <div className="text-sm text-slate-400">{t('calendar.hours')}</div>
         </div>
       </div>
 
       {/* Instructions */}
       <p className="text-center text-slate-500 text-sm">
-        Click on a day to add workouts. You can add multiple workouts per day!
+        {t('calendar.description')}
       </p>
 
       {/* Action Buttons */}
@@ -452,14 +355,14 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
           className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
+          {t('calendar.back')}
         </button>
         <button
           type="button"
           onClick={handleSubmit}
           className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/25"
         >
-          Calculate My Macros
+          {t('calendar.calculateMacros')}
         </button>
       </div>
     </div>

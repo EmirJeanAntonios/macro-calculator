@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   History, 
   Calculator, 
@@ -11,8 +12,10 @@ import {
 } from 'lucide-react';
 import type { MacroResult } from '../types';
 import { macroService } from '../services/api';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function HistoryPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [results, setResults] = useState<MacroResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,10 +34,10 @@ export default function HistoryPage() {
       if (response.success && response.data) {
         setResults(response.data);
       } else {
-        setError(response.error || 'Failed to load results');
+        setError(response.error || t('errors.loadFailed'));
       }
     } catch {
-      setError('An unexpected error occurred');
+      setError(t('errors.unexpected'));
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +45,13 @@ export default function HistoryPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
+    const localeMap: Record<string, string> = {
+      en: 'en-US',
+      es: 'es-ES',
+      tr: 'tr-TR',
+      fr: 'fr-FR',
+    };
+    return new Intl.DateTimeFormat(localeMap[i18n.language] || 'en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -52,12 +61,8 @@ export default function HistoryPage() {
   };
 
   const getGoalLabel = (goal?: string) => {
-    switch (goal) {
-      case 'weight_loss': return 'Weight Loss';
-      case 'muscle_gain': return 'Muscle Gain';
-      case 'maintenance': return 'Maintenance';
-      default: return 'Unknown';
-    }
+    if (!goal) return '';
+    return t(`history.goals.${goal}`);
   };
 
   const getGoalColor = (goal?: string) => {
@@ -79,24 +84,25 @@ export default function HistoryPage() {
               <Calculator className="w-8 h-8 text-emerald-400" />
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-              Macro Calculator
+              {t('app.title')}
             </h1>
           </Link>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-2 sm:gap-4">
             <Link
               to="/"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
             >
               <Plus className="w-4 h-4" />
-              New Calculation
+              <span className="hidden sm:inline">{t('app.newCalculation')}</span>
             </Link>
             <Link
               to="/history"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400"
             >
               <History className="w-4 h-4" />
-              History
+              <span className="hidden sm:inline">{t('app.history')}</span>
             </Link>
+            <LanguageSwitcher />
           </nav>
         </div>
       </header>
@@ -109,8 +115,8 @@ export default function HistoryPage() {
               <History className="w-6 h-6 text-amber-400" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Calculation History</h2>
-              <p className="text-slate-400">View your previous macro calculations</p>
+              <h2 className="text-2xl font-bold">{t('history.title')}</h2>
+              <p className="text-slate-400">{t('history.subtitle')}</p>
             </div>
           </div>
 
@@ -118,7 +124,7 @@ export default function HistoryPage() {
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="w-12 h-12 text-emerald-400 animate-spin mb-4" />
-              <p className="text-slate-400">Loading your history...</p>
+              <p className="text-slate-400">{t('history.loading')}</p>
             </div>
           )}
 
@@ -130,7 +136,7 @@ export default function HistoryPage() {
                 onClick={loadResults}
                 className="px-4 py-2 bg-red-500/30 hover:bg-red-500/40 rounded-lg text-red-300 transition-colors"
               >
-                Try Again
+                {t('history.tryAgain')}
               </button>
             </div>
           )}
@@ -141,14 +147,14 @@ export default function HistoryPage() {
               <div className="p-4 bg-slate-700/50 rounded-full inline-block mb-4">
                 <Calculator className="w-12 h-12 text-slate-500" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">No calculations yet</h3>
-              <p className="text-slate-400 mb-6">Start by creating your first macro calculation</p>
+              <h3 className="text-xl font-semibold mb-2">{t('history.noResults')}</h3>
+              <p className="text-slate-400 mb-6">{t('history.startFirst')}</p>
               <button
                 onClick={() => navigate('/')}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-xl font-medium hover:opacity-90 transition-opacity"
               >
                 <Plus className="w-5 h-5" />
-                Create Calculation
+                {t('history.createCalculation')}
               </button>
             </div>
           )}
@@ -182,7 +188,7 @@ export default function HistoryPage() {
                         <div className="flex items-center gap-2">
                           <Flame className="w-5 h-5 text-orange-400" />
                           <span className="text-xl font-bold">{result.dailyCalories}</span>
-                          <span className="text-slate-500 text-sm">kcal</span>
+                          <span className="text-slate-500 text-sm">{t('results.kcal')}</span>
                         </div>
                         <div className="flex items-center gap-4 text-sm">
                           <div className="flex items-center gap-1">
@@ -203,7 +209,7 @@ export default function HistoryPage() {
                       {/* User Info */}
                       {result.userInput && (
                         <div className="mt-3 text-sm text-slate-500">
-                          {result.userInput.age} years old • {result.userInput.weight}{result.userInput.weightUnit} • {result.userInput.height}{result.userInput.heightUnit}
+                          {result.userInput.age} • {result.userInput.weight}{result.userInput.weightUnit} • {result.userInput.height}{result.userInput.heightUnit}
                         </div>
                       )}
                     </div>
@@ -219,9 +225,8 @@ export default function HistoryPage() {
 
       {/* Footer */}
       <footer className="py-6 px-8 border-t border-white/10 text-center text-slate-500 text-sm">
-        <p>Macro Calculator — Calculate your perfect nutrition plan</p>
+        <p>{t('app.title')} — {t('app.subtitle')}</p>
       </footer>
     </div>
   );
 }
-

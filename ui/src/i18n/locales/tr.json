@@ -1,0 +1,148 @@
+{
+  "app": {
+    "title": "Makro Hesaplayıcı",
+    "subtitle": "Mükemmel beslenme planınızı hesaplayın",
+    "newCalculation": "Yeni Hesaplama",
+    "history": "Geçmiş"
+  },
+  "home": {
+    "tellUs": "Kendiniz Hakkında Bilgi Verin",
+    "enterDetails": "Kişiselleştirilmiş makro önerileri almak için bilgilerinizi girin",
+    "workoutSchedule": "Antrenman Programınız",
+    "setWorkoutPlan": "Beslenmenizi optimize etmek için haftalık antrenman planınızı ayarlayın",
+    "calculating": "Makrolarınız hesaplanıyor..."
+  },
+  "form": {
+    "age": "Yaş",
+    "enterAge": "Yaşınızı girin",
+    "gender": "Biyolojik Cinsiyet",
+    "male": "Erkek",
+    "female": "Kadın",
+    "weight": "Kilo",
+    "enterWeight": "Kilonuzu girin",
+    "height": "Boy",
+    "enterHeight": "Boyunuzu girin",
+    "goal": "Hedefiniz",
+    "weightLoss": "Kilo Verme",
+    "calorieDeficit": "Kalori açığı",
+    "maintenance": "Koruma",
+    "balancedDiet": "Dengeli diyet",
+    "muscleGain": "Kas Kazanımı",
+    "calorieSurplus": "Kalori fazlası",
+    "continue": "Devam Et",
+    "validation": {
+      "ageRange": "Yaş 13 ile 120 arasında olmalıdır",
+      "validWeight": "Lütfen geçerli bir kilo girin",
+      "validHeight": "Lütfen geçerli bir boy girin"
+    }
+  },
+  "calendar": {
+    "title": "Haftalık Antrenman Takvimi",
+    "description": "Antrenman türü ve süresini ayarlamak için bir güne tıklayın",
+    "back": "Geri",
+    "calculateMacros": "Makrolarımı Hesapla",
+    "addWorkout": "Başka antrenman ekle",
+    "duration": "Süre",
+    "hours": "saat",
+    "days": {
+      "monday": "Pazartesi",
+      "tuesday": "Salı",
+      "wednesday": "Çarşamba",
+      "thursday": "Perşembe",
+      "friday": "Cuma",
+      "saturday": "Cumartesi",
+      "sunday": "Pazar",
+      "mon": "Pzt",
+      "tue": "Sal",
+      "wed": "Çar",
+      "thu": "Per",
+      "fri": "Cum",
+      "sat": "Cmt",
+      "sun": "Paz"
+    },
+    "workouts": {
+      "rest": "Dinlenme Günü",
+      "cardio": "Kardiyo",
+      "strength": "Güç",
+      "hiit": "HIIT",
+      "yoga": "Yoga",
+      "sports": "Spor",
+      "running": "Koşu",
+      "cycling": "Bisiklet",
+      "swimming": "Yüzme",
+      "crossfit": "CrossFit",
+      "pilates": "Pilates",
+      "boxing": "Boks",
+      "martial_arts": "Dövüş Sanatları",
+      "dance": "Dans",
+      "climbing": "Tırmanış",
+      "walking": "Yürüyüş",
+      "other": "Diğer"
+    }
+  },
+  "results": {
+    "title": "Kişiselleştirilmiş",
+    "macroPlan": "Makro Planınız",
+    "basedOn": "Profilinize ve antrenman programınıza göre",
+    "bmr": "Bazal Metabolizma Hızı",
+    "bmrDesc": "Dinlenme halinde yakılan kalori",
+    "tdee": "Toplam Günlük Enerji",
+    "tdeeDesc": "Aktivite dahil",
+    "dailyTargets": "Günlük Makro Hedefleri",
+    "protein": "Protein",
+    "carbs": "Karbonhidrat",
+    "fats": "Yağ",
+    "calories": "Kalori",
+    "kcal": "kcal",
+    "specialDays": "Özel Gün Ayarlamaları",
+    "specialDaysDesc": "Her gün aktivite seviyenize göre beslenmenizi optimize edin",
+    "workoutDay": "Antrenman Günü",
+    "restDay": "Dinlenme Günü",
+    "moreCalories": "daha fazla kalori",
+    "fewerCalories": "daha az kalori",
+    "downloadPdf": "PDF Raporu İndir",
+    "proTips": "Profesyonel İpuçları",
+    "tips": {
+      "protein": "Optimum emilim için protein alımınızı 4-5 öğüne yayın",
+      "carbs": "Yulaf, pirinç ve tatlı patates gibi kompleks karbonhidratlara odaklanın",
+      "fats": "Avokado, kuruyemiş ve zeytinyağından sağlıklı yağlar ekleyin",
+      "hydration": "Hidrate kalın - günde en az 2-3 litre su hedefleyin",
+      "progress": "İlerlemenizi takip edin ve gerekirse 2-3 hafta sonra ayarlayın"
+    }
+  },
+  "history": {
+    "title": "Hesaplama Geçmişi",
+    "subtitle": "Önceki makro hesaplamalarınızı görüntüleyin",
+    "loading": "Geçmişiniz yükleniyor...",
+    "noResults": "Henüz hesaplama yok",
+    "startFirst": "İlk makro hesaplamanızı oluşturarak başlayın",
+    "createCalculation": "Hesaplama Oluştur",
+    "tryAgain": "Tekrar Dene",
+    "goals": {
+      "weight_loss": "Kilo Verme",
+      "muscle_gain": "Kas Kazanımı",
+      "maintenance": "Koruma"
+    }
+  },
+  "steps": {
+    "yourInfo": "Bilgileriniz",
+    "workoutSchedule": "Antrenman",
+    "results": "Sonuçlar"
+  },
+  "errors": {
+    "calculationFailed": "Makro hesaplama başarısız",
+    "unexpected": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.",
+    "fetchFailed": "Sonuçlar alınamadı",
+    "loadFailed": "Sonuçlar yüklenemedi",
+    "notFound": "Sonuçlar bulunamadı",
+    "pdfFailed": "PDF indirilemedi"
+  },
+  "language": {
+    "select": "Dil",
+    "en": "English",
+    "es": "Español",
+    "tr": "Türkçe",
+    "fr": "Français"
+  }
+}
+

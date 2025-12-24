@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Dumbbell, Moon } from 'lucide-react';
 
 interface SpecialDayCardProps {
@@ -15,6 +16,7 @@ export default function SpecialDayCard({
   carbs,
   fats,
 }: SpecialDayCardProps) {
+  const { t } = useTranslation();
   const isWorkout = type === 'workout';
 
   return (
@@ -39,33 +41,32 @@ export default function SpecialDayCard({
         </div>
         <div>
           <h4 className="font-semibold text-white">
-            {isWorkout ? 'Workout Days' : 'Rest Days'}
+            {isWorkout ? t('results.workoutDay') : t('results.restDay')}
           </h4>
           <p className="text-xs text-slate-400">
-            {isWorkout ? 'Higher carbs for energy' : 'Lower carbs for recovery'}
+            {isWorkout ? t('results.moreCalories') : t('results.fewerCalories')}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-slate-800/50 rounded-xl p-3">
-          <div className="text-xs text-slate-400">Calories</div>
+          <div className="text-xs text-slate-400">{t('results.calories')}</div>
           <div className="text-xl font-bold text-emerald-400">{calories}</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl p-3">
-          <div className="text-xs text-slate-400">Protein</div>
+          <div className="text-xs text-slate-400">{t('results.protein')}</div>
           <div className="text-xl font-bold text-indigo-400">{protein}g</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl p-3">
-          <div className="text-xs text-slate-400">Carbs</div>
+          <div className="text-xs text-slate-400">{t('results.carbs')}</div>
           <div className="text-xl font-bold text-amber-400">{carbs}g</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl p-3">
-          <div className="text-xs text-slate-400">Fats</div>
+          <div className="text-xs text-slate-400">{t('results.fats')}</div>
           <div className="text-xl font-bold text-rose-400">{fats}g</div>
         </div>
       </div>
     </div>
   );
 }
-

@@ -1,22 +1,25 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Calculator, Loader2, History, Plus } from 'lucide-react';
 import { UserInputForm, StepIndicator, WorkoutCalendar } from '../components';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import type { UserInput, Workout, CalculateRequest } from '../types';
 import { macroService } from '../services/api';
 
-const STEPS = [
-  { id: 1, label: 'Your Info' },
-  { id: 2, label: 'Workout Schedule' },
-  { id: 3, label: 'Results' },
-];
-
 export default function HomePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [userInput, setUserInput] = useState<UserInput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const STEPS = [
+    { id: 1, label: t('steps.yourInfo') },
+    { id: 2, label: t('steps.workoutSchedule') },
+    { id: 3, label: t('steps.results') },
+  ];
 
   const handleUserInputSubmit = (data: UserInput) => {
     setUserInput(data);
@@ -40,10 +43,10 @@ export default function HomePage() {
       if (response.success && response.data) {
         navigate(`/results/${response.data.id}`);
       } else {
-        setError(response.error || 'Failed to calculate macros');
+        setError(response.error || t('errors.calculationFailed'));
       }
     } catch {
-      setError('An unexpected error occurred. Please try again.');
+      setError(t('errors.unexpected'));
     } finally {
       setIsLoading(false);
     }
@@ -63,24 +66,25 @@ export default function HomePage() {
               <Calculator className="w-8 h-8 text-emerald-400" />
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-              Macro Calculator
+              {t('app.title')}
             </h1>
           </Link>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-2 sm:gap-4">
             <Link
               to="/"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400"
             >
               <Plus className="w-4 h-4" />
-              New Calculation
+              <span className="hidden sm:inline">{t('app.newCalculation')}</span>
             </Link>
             <Link
               to="/history"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
             >
               <History className="w-4 h-4" />
-              History
+              <span className="hidden sm:inline">{t('app.history')}</span>
             </Link>
+            <LanguageSwitcher />
           </nav>
         </div>
       </header>
@@ -103,7 +107,7 @@ export default function HomePage() {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
               <div className="bg-slate-800 p-8 rounded-2xl flex flex-col items-center gap-4">
                 <Loader2 className="w-12 h-12 text-emerald-400 animate-spin" />
-                <p className="text-white font-medium">Calculating your macros...</p>
+                <p className="text-white font-medium">{t('home.calculating')}</p>
               </div>
             </div>
           )}
@@ -113,10 +117,10 @@ export default function HomePage() {
             {currentStep === 1 && (
               <>
                 <h2 className="text-2xl font-bold mb-2 text-center">
-                  Tell Us About Yourself
+                  {t('home.tellUs')}
                 </h2>
                 <p className="text-slate-400 text-center mb-8">
-                  Enter your details to get personalized macro recommendations
+                  {t('home.enterDetails')}
                 </p>
                 <UserInputForm
                   onSubmit={handleUserInputSubmit}
@@ -128,10 +132,10 @@ export default function HomePage() {
             {currentStep === 2 && (
               <>
                 <h2 className="text-2xl font-bold mb-2 text-center">
-                  Your Workout Schedule
+                  {t('home.workoutSchedule')}
                 </h2>
                 <p className="text-slate-400 text-center mb-8">
-                  Set your weekly workout plan to optimize your nutrition
+                  {t('home.setWorkoutPlan')}
                 </p>
                 <WorkoutCalendar onSubmit={handleWorkoutSubmit} onBack={handleBack} />
               </>
@@ -142,7 +146,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="py-6 px-8 border-t border-white/10 text-center text-slate-500 text-sm">
-        <p>Macro Calculator — Calculate your perfect nutrition plan</p>
+        <p>{t('app.title')} — {t('app.subtitle')}</p>
       </footer>
     </div>
   );
