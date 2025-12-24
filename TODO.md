@@ -68,12 +68,13 @@
 - [x] Step indicator component
 - [x] Custom hooks for calculator state
 
-### Task 3.2: Workout Calendar Component
-- [ ] Create interactive calendar view
-- [ ] Allow users to select workout days
-- [ ] Workout type selector for each day (Cardio, Strength, HIIT, Rest, etc.)
-- [ ] Hours/duration input for each workout
-- [ ] Visual indicators for different workout types
+### Task 3.2: Workout Calendar Component ✅
+- [x] Create interactive calendar view
+- [x] Allow users to select workout days
+- [x] Workout type selector for each day (Cardio, Strength, HIIT, Rest, Yoga, Sports, Other)
+- [x] Hours/duration input with slider (0.5-4h)
+- [x] Visual indicators with icons and colors for different workout types
+- [x] Summary stats (workout days, total hours)
 
 ### Task 3.3: Results Display
 - [ ] Create results page/component

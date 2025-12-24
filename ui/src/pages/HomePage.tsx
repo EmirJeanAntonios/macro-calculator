@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calculator, Loader2 } from 'lucide-react';
-import { UserInputForm, StepIndicator } from '../components';
-import WorkoutCalendar from '../components/WorkoutCalendar';
+import { UserInputForm, StepIndicator, WorkoutCalendar } from '../components';
 import type { UserInput, Workout, CalculateRequest } from '../types';
 import { macroService } from '../services/api';
 
