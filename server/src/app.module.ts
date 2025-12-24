@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { MacroCalculatorModule } from './modules/macro-calculator/macro-calculator.module';
 
 @Module({
   imports: [
@@ -28,6 +29,9 @@ import { AppService } from './app.service';
         logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
+
+    // Feature modules
+    MacroCalculatorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

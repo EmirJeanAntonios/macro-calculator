@@ -25,21 +25,21 @@
 
 ## Phase 2: Backend Development
 
-### Task 2.1: User Input Module
-- [ ] Create DTOs for user input validation (age, gender, weight, height, goal)
-- [ ] Create user input controller and service
-- [ ] Implement input validation logic
+### Task 2.1: User Input Module ✅
+- [x] Create DTOs for user input validation (age, gender, weight, height, goal)
+- [x] Create user input controller and service
+- [x] Implement input validation logic
 
-### Task 2.2: Workout Schedule Module
-- [ ] Create Workout entity with fields (day, type, duration/hours)
-- [ ] Create workout controller and service
-- [ ] Implement CRUD operations for workout schedule
+### Task 2.2: Workout Schedule Module ✅
+- [x] Create Workout entity with fields (day, type, duration/hours)
+- [x] Create workout DTO and validation
+- [x] Integrated into MacroCalculator service
 
-### Task 2.3: Macro Calculation Engine
-- [ ] Implement BMR (Basal Metabolic Rate) calculation
-- [ ] Implement TDEE (Total Daily Energy Expenditure) calculation
-- [ ] Implement macro distribution based on goals (weight loss, maintenance, muscle gain)
-- [ ] Handle special day calculations (rest days vs workout days)
+### Task 2.3: Macro Calculation Engine ✅
+- [x] Implement BMR (Basal Metabolic Rate) calculation (Mifflin-St Jeor)
+- [x] Implement TDEE (Total Daily Energy Expenditure) calculation
+- [x] Implement macro distribution based on goals (weight loss, maintenance, muscle gain)
+- [x] Handle special day calculations (rest days vs workout days)
 
 ### Task 2.4: PDF Generation
 - [ ] Install PDF generation library (PDFKit or similar)
