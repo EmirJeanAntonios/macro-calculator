@@ -21,12 +21,10 @@ FROM nginx:alpine AS production
 # Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Note: nginx.conf is mounted via docker-compose volume
 
 # Expose port
 EXPOSE 3000
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
-
