@@ -93,6 +93,11 @@ npm run dev
 
 ### 5. Access the App
 
+**With Docker:**
+- **Frontend:** http://localhost:8080
+- **Backend API:** http://localhost:3002/api
+
+**Without Docker (npm):**
 - **Frontend:** http://localhost:3000
 - **Backend API:** http://localhost:3001/api
 

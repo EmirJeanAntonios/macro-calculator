@@ -22,10 +22,6 @@ export default function CalorieRing({ calories, protein, carbs, fats }: CalorieR
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
 
-  const proteinOffset = 0;
-  const carbsOffset = (proteinPct / 100) * circumference;
-  const fatsOffset = ((proteinPct + carbsPct) / 100) * circumference;
-
   return (
     <div className="relative flex items-center justify-center">
       <svg width={size} height={size} className="-rotate-90">

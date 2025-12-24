@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { User, Scale, Ruler, Target } from 'lucide-react';
-import type { UserInput, Gender, Goal, WeightUnit, HeightUnit } from '../types';
+import type { UserInput, WeightUnit, HeightUnit } from '../types';
 
 interface UserInputFormProps {
   onSubmit: (data: UserInput) => void;
