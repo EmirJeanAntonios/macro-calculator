@@ -41,17 +41,17 @@
 - [x] Implement macro distribution based on goals (weight loss, maintenance, muscle gain)
 - [x] Handle special day calculations (rest days vs workout days)
 
-### Task 2.4: PDF Generation
-- [ ] Install PDF generation library (PDFKit or similar)
-- [ ] Create PDF template for macro results
-- [ ] Implement PDF generation endpoint
-- [ ] Add download functionality
+### Task 2.4: PDF Generation ✅
+- [x] Install PDF generation library (PDFKit)
+- [x] Create PDF template for macro results
+- [x] Implement PDF generation endpoint (GET /api/pdf/:id)
+- [x] Add download functionality
 
-### Task 2.5: API Endpoints
-- [ ] POST /api/calculate - Calculate macros based on user input
-- [ ] GET /api/macros/:id - Get saved macro results
-- [ ] POST /api/workout-schedule - Save workout schedule
-- [ ] GET /api/pdf/:id - Generate and download PDF
+### Task 2.5: API Endpoints ✅
+- [x] POST /api/calculate - Calculate macros based on user input
+- [x] GET /api/macros/:id - Get saved macro results
+- [x] GET /api/pdf/:id - Generate and download PDF
+- [x] (Workout schedule integrated into calculate endpoint)
 
 ---
 
@@ -119,7 +119,7 @@
 | Phase | Status | Notes |
 |-------|--------|-------|
 | Phase 1: Project Setup | ✅ Completed | All setup tasks done |
-| Phase 2: Backend Development | ⏳ Pending | |
+| Phase 2: Backend Development | ✅ Completed | All backend tasks done |
 | Phase 3: Frontend Development | ⏳ Pending | |
 | Phase 4: Integration & Testing | ⏳ Pending | |
 
