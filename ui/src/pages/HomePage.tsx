@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Calculator, Loader2 } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Calculator, Loader2, History, Plus } from 'lucide-react';
 import { UserInputForm, StepIndicator, WorkoutCalendar } from '../components';
 import type { UserInput, Workout, CalculateRequest } from '../types';
 import { macroService } from '../services/api';
@@ -57,13 +57,31 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="py-6 px-8 border-b border-white/10">
-        <div className="max-w-6xl mx-auto flex items-center gap-3">
-          <div className="p-2 bg-emerald-500/20 rounded-xl">
-            <Calculator className="w-8 h-8 text-emerald-400" />
-          </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-            Macro Calculator
-          </h1>
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="p-2 bg-emerald-500/20 rounded-xl">
+              <Calculator className="w-8 h-8 text-emerald-400" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+              Macro Calculator
+            </h1>
+          </Link>
+          <nav className="flex items-center gap-4">
+            <Link
+              to="/"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400"
+            >
+              <Plus className="w-4 h-4" />
+              New Calculation
+            </Link>
+            <Link
+              to="/history"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            >
+              <History className="w-4 h-4" />
+              History
+            </Link>
+          </nav>
         </div>
       </header>
 

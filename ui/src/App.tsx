@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ResultsPage from './pages/ResultsPage';
+import HistoryPage from './pages/HistoryPage';
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/results/:id" element={<ResultsPage />} />
+          <Route path="/history" element={<HistoryPage />} />
         </Routes>
       </div>
     </Router>

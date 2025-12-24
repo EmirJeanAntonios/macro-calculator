@@ -88,6 +88,16 @@ export class MacroCalculatorService {
     });
   }
 
+  /**
+   * Get all macro results (most recent first)
+   */
+  async getAllResults(): Promise<MacroResult[]> {
+    return this.macroResultRepository.find({
+      relations: ['userInput', 'userInput.workouts'],
+      order: { calculatedAt: 'DESC' },
+    });
+  }
+
   // ============ PRIVATE HELPER METHODS ============
 
   /**

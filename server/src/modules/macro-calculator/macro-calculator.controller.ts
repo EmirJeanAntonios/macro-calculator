@@ -34,6 +34,19 @@ export class MacroCalculatorController {
   }
 
   /**
+   * GET /api/macros
+   * Get all saved macro results
+   */
+  @Get('macros')
+  async getAllResults() {
+    const results = await this.macroCalculatorService.getAllResults();
+    return {
+      success: true,
+      data: results,
+    };
+  }
+
+  /**
    * GET /api/macros/:id
    * Get saved macro results by ID
    */

@@ -57,6 +57,12 @@ export interface MacroResult {
   restDayCarbs?: number;
   restDayFats?: number;
   calculatedAt: string;
+  userInput?: UserInputWithWorkouts;
+}
+
+export interface UserInputWithWorkouts extends UserInput {
+  id: string;
+  workouts: Workout[];
 }
 
 export interface CalculateRequest {

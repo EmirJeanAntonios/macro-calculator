@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  ArrowLeft,
   Download,
   Loader2,
   Calculator,
   Flame,
   Activity,
   RefreshCw,
+  History,
+  Plus,
 } from 'lucide-react';
 import type { MacroResult } from '../types';
 import { macroService } from '../services/api';
@@ -108,35 +109,43 @@ export default function ResultsPage() {
       {/* Header */}
       <header className="py-6 px-8 border-b border-white/10">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="hidden sm:inline">New Calculation</span>
-          </Link>
-
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="p-2 bg-emerald-500/20 rounded-xl">
               <Calculator className="w-6 h-6 text-emerald-400" />
             </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
               Macro Calculator
             </h1>
-          </div>
+          </Link>
 
-          <button
-            onClick={handleDownloadPdf}
-            disabled={isDownloading}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl transition-colors"
-          >
-            {isDownloading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4" />
-            )}
-            <span className="hidden sm:inline">Download PDF</span>
-          </button>
+          <nav className="flex items-center gap-2 sm:gap-4">
+            <Link
+              to="/"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">New</span>
+            </Link>
+            <Link
+              to="/history"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            >
+              <History className="w-4 h-4" />
+              <span className="hidden sm:inline">History</span>
+            </Link>
+            <button
+              onClick={handleDownloadPdf}
+              disabled={isDownloading}
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl transition-colors"
+            >
+              {isDownloading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+          </nav>
         </div>
       </header>
 
