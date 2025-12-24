@@ -4,7 +4,24 @@ export type Goal = 'weight_loss' | 'maintenance' | 'muscle_gain';
 export type WeightUnit = 'kg' | 'lbs';
 export type HeightUnit = 'cm' | 'ft';
 export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
-export type WorkoutType = 'rest' | 'cardio' | 'strength' | 'hiit' | 'yoga' | 'sports' | 'other';
+export type WorkoutType = 
+  | 'rest' 
+  | 'cardio' 
+  | 'strength' 
+  | 'hiit' 
+  | 'yoga' 
+  | 'sports' 
+  | 'running' 
+  | 'cycling' 
+  | 'swimming' 
+  | 'pilates' 
+  | 'crossfit' 
+  | 'boxing' 
+  | 'dance' 
+  | 'walking' 
+  | 'climbing' 
+  | 'martial_arts' 
+  | 'other';
 
 export interface UserInput {
   age: number;

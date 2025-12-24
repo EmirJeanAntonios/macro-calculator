@@ -231,6 +231,26 @@ export class PdfService {
         return 'Yoga';
       case WorkoutType.SPORTS:
         return 'Sports';
+      case WorkoutType.RUNNING:
+        return 'Running';
+      case WorkoutType.CYCLING:
+        return 'Cycling';
+      case WorkoutType.SWIMMING:
+        return 'Swimming';
+      case WorkoutType.PILATES:
+        return 'Pilates';
+      case WorkoutType.CROSSFIT:
+        return 'CrossFit';
+      case WorkoutType.BOXING:
+        return 'Boxing';
+      case WorkoutType.DANCE:
+        return 'Dance';
+      case WorkoutType.WALKING:
+        return 'Walking';
+      case WorkoutType.CLIMBING:
+        return 'Climbing';
+      case WorkoutType.MARTIAL_ARTS:
+        return 'Martial Arts';
       case WorkoutType.OTHER:
         return 'Other';
       default:

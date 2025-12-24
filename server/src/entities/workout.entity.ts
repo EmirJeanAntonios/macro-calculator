@@ -24,6 +24,16 @@ export enum WorkoutType {
   HIIT = 'hiit',
   YOGA = 'yoga',
   SPORTS = 'sports',
+  RUNNING = 'running',
+  CYCLING = 'cycling',
+  SWIMMING = 'swimming',
+  PILATES = 'pilates',
+  CROSSFIT = 'crossfit',
+  BOXING = 'boxing',
+  DANCE = 'dance',
+  WALKING = 'walking',
+  CLIMBING = 'climbing',
+  MARTIAL_ARTS = 'martial_arts',
   OTHER = 'other',
 }
 

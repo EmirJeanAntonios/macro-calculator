@@ -9,6 +9,16 @@ import {
   Moon,
   MoreHorizontal,
   Clock,
+  Footprints,
+  Bike,
+  Waves,
+  PersonStanding,
+  Flame,
+  Hand,
+  Music,
+  TreePine,
+  Mountain,
+  Swords,
 } from 'lucide-react';
 import type { Workout, DayOfWeek, WorkoutType } from '../types';
 
@@ -42,6 +52,13 @@ const WORKOUT_TYPES: {
     bgColor: 'bg-slate-500/20',
   },
   {
+    type: 'strength',
+    label: 'Strength',
+    icon: Dumbbell,
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/20',
+  },
+  {
     type: 'cardio',
     label: 'Cardio',
     icon: Heart,
@@ -49,11 +66,25 @@ const WORKOUT_TYPES: {
     bgColor: 'bg-rose-500/20',
   },
   {
-    type: 'strength',
-    label: 'Strength',
-    icon: Dumbbell,
-    color: 'text-blue-400',
-    bgColor: 'bg-blue-500/20',
+    type: 'running',
+    label: 'Running',
+    icon: Footprints,
+    color: 'text-orange-400',
+    bgColor: 'bg-orange-500/20',
+  },
+  {
+    type: 'cycling',
+    label: 'Cycling',
+    icon: Bike,
+    color: 'text-lime-400',
+    bgColor: 'bg-lime-500/20',
+  },
+  {
+    type: 'swimming',
+    label: 'Swimming',
+    icon: Waves,
+    color: 'text-cyan-400',
+    bgColor: 'bg-cyan-500/20',
   },
   {
     type: 'hiit',
@@ -63,11 +94,60 @@ const WORKOUT_TYPES: {
     bgColor: 'bg-amber-500/20',
   },
   {
+    type: 'crossfit',
+    label: 'CrossFit',
+    icon: Flame,
+    color: 'text-red-400',
+    bgColor: 'bg-red-500/20',
+  },
+  {
     type: 'yoga',
     label: 'Yoga',
     icon: Sparkles,
     color: 'text-purple-400',
     bgColor: 'bg-purple-500/20',
+  },
+  {
+    type: 'pilates',
+    label: 'Pilates',
+    icon: PersonStanding,
+    color: 'text-pink-400',
+    bgColor: 'bg-pink-500/20',
+  },
+  {
+    type: 'boxing',
+    label: 'Boxing',
+    icon: Hand,
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/20',
+  },
+  {
+    type: 'martial_arts',
+    label: 'Martial Arts',
+    icon: Swords,
+    color: 'text-indigo-400',
+    bgColor: 'bg-indigo-500/20',
+  },
+  {
+    type: 'dance',
+    label: 'Dance',
+    icon: Music,
+    color: 'text-fuchsia-400',
+    bgColor: 'bg-fuchsia-500/20',
+  },
+  {
+    type: 'climbing',
+    label: 'Climbing',
+    icon: Mountain,
+    color: 'text-stone-400',
+    bgColor: 'bg-stone-500/20',
+  },
+  {
+    type: 'walking',
+    label: 'Walking',
+    icon: TreePine,
+    color: 'text-green-400',
+    bgColor: 'bg-green-500/20',
   },
   {
     type: 'sports',
@@ -80,8 +160,8 @@ const WORKOUT_TYPES: {
     type: 'other',
     label: 'Other',
     icon: MoreHorizontal,
-    color: 'text-cyan-400',
-    bgColor: 'bg-cyan-500/20',
+    color: 'text-teal-400',
+    bgColor: 'bg-teal-500/20',
   },
 ];
 
@@ -122,7 +202,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
   };
 
   const getWorkoutInfo = (type: WorkoutType) => {
-    return WORKOUT_TYPES.find((w) => w.type === type)!;
+    return WORKOUT_TYPES.find((w) => w.type === type) || WORKOUT_TYPES[0];
   };
 
   const workoutDays = Object.values(schedule).filter((d) => d.type !== 'rest').length;
@@ -171,7 +251,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
           {/* Workout Type Selector */}
           <div className="mb-4">
             <label className="block text-sm text-slate-400 mb-2">Workout Type</label>
-            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-48 overflow-y-auto pr-1">
               {WORKOUT_TYPES.map(({ type, label, icon: Icon, color, bgColor }) => {
                 const isActive = schedule[selectedDay].type === type;
                 return (
@@ -179,13 +259,13 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
                     key={type}
                     type="button"
                     onClick={() => updateDay(selectedDay, { type, hours: type === 'rest' ? 0 : schedule[selectedDay].hours || 1 })}
-                    className={`flex flex-col items-center p-3 rounded-xl transition-all ${
+                    className={`flex flex-col items-center p-2 rounded-xl transition-all ${
                       isActive
-                        ? `${bgColor} ring-2 ring-offset-2 ring-offset-slate-800 ${color.replace('text-', 'ring-')}`
+                        ? `${bgColor} ring-2 ring-offset-1 ring-offset-slate-800 ${color.replace('text-', 'ring-')}`
                         : 'bg-slate-800/50 hover:bg-slate-700/50'
                     }`}
                   >
-                    <Icon className={`w-5 h-5 mb-1 ${isActive ? color : 'text-slate-500'}`} />
+                    <Icon className={`w-4 h-4 mb-1 ${isActive ? color : 'text-slate-500'}`} />
                     <span className={`text-xs ${isActive ? color : 'text-slate-500'}`}>
                       {label}
                     </span>
@@ -246,7 +326,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
 
       {/* Workout Type Legend */}
       <div className="flex flex-wrap gap-2 justify-center">
-        {WORKOUT_TYPES.filter(w => w.type !== 'rest').map(({ type, label, icon: Icon, color }) => (
+        {WORKOUT_TYPES.filter(w => w.type !== 'rest').slice(0, 8).map(({ type, label, icon: Icon, color }) => (
           <div key={type} className="flex items-center gap-1 text-xs text-slate-400">
             <Icon className={`w-3 h-3 ${color}`} />
             <span>{label}</span>
@@ -275,4 +355,3 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
     </div>
   );
 }
-
