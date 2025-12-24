@@ -1,10 +1,10 @@
-import { Injectable, UnauthorizedException, OnModuleInit } from '@nestjs/common';
+import { Injectable, UnauthorizedException, OnModuleInit, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { Admin, Configuration, ConfigCategory, MacroResult } from '../../entities';
-import { LoginDto, UpdateConfigDto } from './dto';
+import { Admin, Configuration, ConfigCategory, MacroResult, WorkoutCategory } from '../../entities';
+import { LoginDto, UpdateConfigDto, CreateWorkoutCategoryDto, UpdateWorkoutCategoryDto } from './dto';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -15,15 +15,18 @@ export class AdminService implements OnModuleInit {
     private configRepository: Repository<Configuration>,
     @InjectRepository(MacroResult)
     private macroResultRepository: Repository<MacroResult>,
+    @InjectRepository(WorkoutCategory)
+    private workoutCategoryRepository: Repository<WorkoutCategory>,
     private jwtService: JwtService,
   ) {}
 
   /**
-   * Initialize default admin and configurations on module start
+   * Initialize default admin, configurations, and workout categories on module start
    */
   async onModuleInit() {
     await this.seedDefaultAdmin();
     await this.seedDefaultConfigurations();
+    await this.seedDefaultWorkoutCategories();
   }
 
   /**
@@ -49,24 +52,6 @@ export class AdminService implements OnModuleInit {
     if (configCount > 0) return;
 
     const defaultConfigs = [
-      // Workout Intensity Multipliers
-      { key: 'intensity_walking', value: 0.5, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Walking', description: 'Light activity (~3.5 METs)' },
-      { key: 'intensity_yoga', value: 0.6, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Yoga', description: 'Light to moderate (~3-4 METs)' },
-      { key: 'intensity_pilates', value: 0.7, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Pilates', description: 'Moderate (~4 METs)' },
-      { key: 'intensity_cycling', value: 0.9, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Cycling', description: 'Moderate to vigorous (~6-8 METs)' },
-      { key: 'intensity_dance', value: 0.9, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Dance', description: 'Moderate to vigorous (~5-8 METs)' },
-      { key: 'intensity_swimming', value: 1.0, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Swimming', description: 'Moderate to vigorous (~6-10 METs)' },
-      { key: 'intensity_strength', value: 1.0, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Strength', description: 'Moderate (~5-6 METs)' },
-      { key: 'intensity_cardio', value: 1.1, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Cardio', description: 'Vigorous (~7-10 METs)' },
-      { key: 'intensity_running', value: 1.2, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Running', description: 'Vigorous (~8-12 METs)' },
-      { key: 'intensity_climbing', value: 1.2, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Climbing', description: 'Vigorous (~8-11 METs)' },
-      { key: 'intensity_sports', value: 1.2, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Sports', description: 'Variable (~6-12 METs)' },
-      { key: 'intensity_martial_arts', value: 1.4, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Martial Arts', description: 'Very vigorous (~10-12 METs)' },
-      { key: 'intensity_boxing', value: 1.5, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Boxing', description: 'Very vigorous (~10-13 METs)' },
-      { key: 'intensity_hiit', value: 1.6, category: ConfigCategory.WORKOUT_INTENSITY, label: 'HIIT', description: 'Extreme (~12-15 METs)' },
-      { key: 'intensity_crossfit', value: 1.7, category: ConfigCategory.WORKOUT_INTENSITY, label: 'CrossFit', description: 'Extreme (~12-16 METs)' },
-      { key: 'intensity_other', value: 1.0, category: ConfigCategory.WORKOUT_INTENSITY, label: 'Other', description: 'Default moderate intensity' },
-
       // Activity Level Thresholds
       { key: 'activity_sedentary', value: 1.2, category: ConfigCategory.ACTIVITY_LEVEL, label: 'Sedentary Multiplier', description: 'Little to no exercise' },
       { key: 'activity_light', value: 1.375, category: ConfigCategory.ACTIVITY_LEVEL, label: 'Light Activity Multiplier', description: 'Light exercise 1-3 days/week' },
@@ -103,8 +88,38 @@ export class AdminService implements OnModuleInit {
   }
 
   /**
-   * Admin login
+   * Seed default workout categories if none exist
    */
+  private async seedDefaultWorkoutCategories() {
+    const count = await this.workoutCategoryRepository.count();
+    if (count > 0) return;
+
+    const defaultCategories = [
+      { key: 'rest', name: 'Rest Day', intensity: 0, icon: 'Moon', color: 'slate', description: 'No exercise', sortOrder: 0, isDefault: true },
+      { key: 'walking', name: 'Walking', intensity: 0.5, icon: 'Footprints', color: 'green', description: 'Light activity (~3.5 METs)', sortOrder: 1, isDefault: true },
+      { key: 'yoga', name: 'Yoga', intensity: 0.6, icon: 'Sparkles', color: 'purple', description: 'Light to moderate (~3-4 METs)', sortOrder: 2, isDefault: true },
+      { key: 'pilates', name: 'Pilates', intensity: 0.7, icon: 'PersonStanding', color: 'pink', description: 'Moderate (~4 METs)', sortOrder: 3, isDefault: true },
+      { key: 'cycling', name: 'Cycling', intensity: 0.9, icon: 'Bike', color: 'lime', description: 'Moderate to vigorous (~6-8 METs)', sortOrder: 4, isDefault: true },
+      { key: 'dance', name: 'Dance', intensity: 0.9, icon: 'Music', color: 'fuchsia', description: 'Moderate to vigorous (~5-8 METs)', sortOrder: 5, isDefault: true },
+      { key: 'swimming', name: 'Swimming', intensity: 1.0, icon: 'Waves', color: 'cyan', description: 'Moderate to vigorous (~6-10 METs)', sortOrder: 6, isDefault: true },
+      { key: 'strength', name: 'Strength', intensity: 1.0, icon: 'Dumbbell', color: 'blue', description: 'Moderate (~5-6 METs)', sortOrder: 7, isDefault: true },
+      { key: 'cardio', name: 'Cardio', intensity: 1.1, icon: 'Heart', color: 'red', description: 'Vigorous (~7-10 METs)', sortOrder: 8, isDefault: true },
+      { key: 'running', name: 'Running', intensity: 1.2, icon: 'Footprints', color: 'orange', description: 'Vigorous (~8-12 METs)', sortOrder: 9, isDefault: true },
+      { key: 'climbing', name: 'Climbing', intensity: 1.2, icon: 'Mountain', color: 'stone', description: 'Vigorous (~8-11 METs)', sortOrder: 10, isDefault: true },
+      { key: 'sports', name: 'Sports', intensity: 1.2, icon: 'Trophy', color: 'amber', description: 'Variable (~6-12 METs)', sortOrder: 11, isDefault: true },
+      { key: 'martial_arts', name: 'Martial Arts', intensity: 1.4, icon: 'Swords', color: 'zinc', description: 'Very vigorous (~10-12 METs)', sortOrder: 12, isDefault: true },
+      { key: 'boxing', name: 'Boxing', intensity: 1.5, icon: 'Hand', color: 'rose', description: 'Very vigorous (~10-13 METs)', sortOrder: 13, isDefault: true },
+      { key: 'hiit', name: 'HIIT', intensity: 1.6, icon: 'Zap', color: 'yellow', description: 'Extreme (~12-15 METs)', sortOrder: 14, isDefault: true },
+      { key: 'crossfit', name: 'CrossFit', intensity: 1.7, icon: 'Flame', color: 'orange', description: 'Extreme (~12-16 METs)', sortOrder: 15, isDefault: true },
+      { key: 'other', name: 'Other', intensity: 1.0, icon: 'MoreHorizontal', color: 'gray', description: 'Custom workout', sortOrder: 99, isDefault: true },
+    ];
+
+    await this.workoutCategoryRepository.save(defaultCategories);
+    console.log('Default workout categories seeded');
+  }
+
+  // ============ AUTHENTICATION ============
+
   async login(dto: LoginDto): Promise<{ accessToken: string; admin: { id: string; username: string } }> {
     const admin = await this.adminRepository.findOne({
       where: { username: dto.username, isActive: true },
@@ -128,9 +143,8 @@ export class AdminService implements OnModuleInit {
     };
   }
 
-  /**
-   * Get all records with pagination
-   */
+  // ============ RECORDS MANAGEMENT ============
+
   async getAllRecords(page = 1, limit = 20) {
     const [records, total] = await this.macroResultRepository.findAndCount({
       relations: ['userInput', 'userInput.workouts'],
@@ -150,9 +164,6 @@ export class AdminService implements OnModuleInit {
     };
   }
 
-  /**
-   * Get a single record by ID
-   */
   async getRecordById(id: string) {
     return this.macroResultRepository.findOne({
       where: { id },
@@ -160,23 +171,18 @@ export class AdminService implements OnModuleInit {
     });
   }
 
-  /**
-   * Delete a record
-   */
   async deleteRecord(id: string) {
     const result = await this.macroResultRepository.delete(id);
     return { deleted: (result.affected ?? 0) > 0 };
   }
 
-  /**
-   * Get all configurations grouped by category
-   */
+  // ============ CONFIGURATIONS ============
+
   async getAllConfigurations() {
     const configs = await this.configRepository.find({
       order: { category: 'ASC', key: 'ASC' },
     });
 
-    // Group by category
     const grouped = configs.reduce((acc, config) => {
       if (!acc[config.category]) {
         acc[config.category] = [];
@@ -188,9 +194,6 @@ export class AdminService implements OnModuleInit {
     return grouped;
   }
 
-  /**
-   * Update configurations
-   */
   async updateConfigurations(dto: UpdateConfigDto) {
     for (const item of dto.configs) {
       await this.configRepository.update(
@@ -201,17 +204,11 @@ export class AdminService implements OnModuleInit {
     return this.getAllConfigurations();
   }
 
-  /**
-   * Get a configuration value by key
-   */
   async getConfigValue(key: string): Promise<number> {
     const config = await this.configRepository.findOne({ where: { key } });
     return config ? Number(config.value) : 0;
   }
 
-  /**
-   * Get all config values as a map
-   */
   async getConfigMap(): Promise<Record<string, number>> {
     const configs = await this.configRepository.find();
     return configs.reduce((acc, c) => {
@@ -219,5 +216,66 @@ export class AdminService implements OnModuleInit {
       return acc;
     }, {} as Record<string, number>);
   }
-}
 
+  // ============ WORKOUT CATEGORIES ============
+
+  async getAllWorkoutCategories(includeInactive = false) {
+    const where = includeInactive ? {} : { isActive: true };
+    return this.workoutCategoryRepository.find({
+      where,
+      order: { sortOrder: 'ASC', name: 'ASC' },
+    });
+  }
+
+  async getWorkoutCategoryByKey(key: string) {
+    return this.workoutCategoryRepository.findOne({ where: { key } });
+  }
+
+  async createWorkoutCategory(dto: CreateWorkoutCategoryDto) {
+    // Check if key already exists
+    const existing = await this.workoutCategoryRepository.findOne({ where: { key: dto.key } });
+    if (existing) {
+      throw new ConflictException(`Workout category with key "${dto.key}" already exists`);
+    }
+
+    const category = this.workoutCategoryRepository.create({
+      ...dto,
+      isDefault: false,
+    });
+    return this.workoutCategoryRepository.save(category);
+  }
+
+  async updateWorkoutCategory(id: string, dto: UpdateWorkoutCategoryDto) {
+    const category = await this.workoutCategoryRepository.findOne({ where: { id } });
+    if (!category) {
+      throw new NotFoundException(`Workout category with ID "${id}" not found`);
+    }
+
+    Object.assign(category, dto);
+    return this.workoutCategoryRepository.save(category);
+  }
+
+  async deleteWorkoutCategory(id: string) {
+    const category = await this.workoutCategoryRepository.findOne({ where: { id } });
+    if (!category) {
+      throw new NotFoundException(`Workout category with ID "${id}" not found`);
+    }
+
+    if (category.isDefault) {
+      throw new ConflictException('Cannot delete default workout categories');
+    }
+
+    const result = await this.workoutCategoryRepository.delete(id);
+    return { deleted: (result.affected ?? 0) > 0 };
+  }
+
+  async getWorkoutIntensityMap(): Promise<Record<string, number>> {
+    const categories = await this.workoutCategoryRepository.find({
+      where: { isActive: true },
+    });
+    return categories.reduce((acc, c) => {
+      acc[c.key] = Number(c.intensity);
+      return acc;
+    }, {} as Record<string, number>);
+  }
+}

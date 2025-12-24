@@ -65,6 +65,19 @@ export class MacroCalculatorController {
   }
 
   /**
+   * GET /api/workout-types
+   * Get all active workout types for the frontend
+   */
+  @Get('workout-types')
+  async getWorkoutTypes() {
+    const types = await this.macroCalculatorService.getWorkoutTypes();
+    return {
+      success: true,
+      data: types,
+    };
+  }
+
+  /**
    * GET /api/pdf/:id
    * Generate and download PDF for macro results
    */

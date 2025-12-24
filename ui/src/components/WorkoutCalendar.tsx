@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
@@ -17,49 +17,68 @@ import {
   Flame,
   Hand,
   Music,
-  TreePine,
   Mountain,
   Swords,
   Plus,
   X,
+  Loader2,
 } from 'lucide-react';
-import type { Workout, DayOfWeek, WorkoutType } from '../types';
+import type { Workout, DayOfWeek, WorkoutTypeOption } from '../types';
+import { macroService } from '../services/api';
 
 interface WorkoutCalendarProps {
   onSubmit: (workouts: Workout[]) => void;
   onBack: () => void;
 }
 
-const WORKOUT_TYPE_CONFIG: {
-  type: WorkoutType;
-  icon: React.ElementType;
-  color: string;
-  bgColor: string;
-}[] = [
-  { type: 'rest', icon: Moon, color: 'text-slate-400', bgColor: 'bg-slate-500/20' },
-  { type: 'strength', icon: Dumbbell, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
-  { type: 'cardio', icon: Heart, color: 'text-rose-400', bgColor: 'bg-rose-500/20' },
-  { type: 'running', icon: Footprints, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
-  { type: 'cycling', icon: Bike, color: 'text-lime-400', bgColor: 'bg-lime-500/20' },
-  { type: 'swimming', icon: Waves, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
-  { type: 'hiit', icon: Zap, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
-  { type: 'crossfit', icon: Flame, color: 'text-red-400', bgColor: 'bg-red-500/20' },
-  { type: 'yoga', icon: Sparkles, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
-  { type: 'pilates', icon: PersonStanding, color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
-  { type: 'boxing', icon: Hand, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
-  { type: 'martial_arts', icon: Swords, color: 'text-indigo-400', bgColor: 'bg-indigo-500/20' },
-  { type: 'dance', icon: Music, color: 'text-fuchsia-400', bgColor: 'bg-fuchsia-500/20' },
-  { type: 'climbing', icon: Mountain, color: 'text-stone-400', bgColor: 'bg-stone-500/20' },
-  { type: 'walking', icon: TreePine, color: 'text-green-400', bgColor: 'bg-green-500/20' },
-  { type: 'sports', icon: Trophy, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
-  { type: 'other', icon: MoreHorizontal, color: 'text-teal-400', bgColor: 'bg-teal-500/20' },
-];
+// Icon mapping for dynamic workout types
+const ICON_MAP: Record<string, React.ElementType> = {
+  Dumbbell,
+  Heart,
+  Zap,
+  Sparkles,
+  Trophy,
+  Moon,
+  MoreHorizontal,
+  Footprints,
+  Bike,
+  Waves,
+  PersonStanding,
+  Flame,
+  Hand,
+  Music,
+  Mountain,
+  Swords,
+};
+
+// Color mapping for dynamic workout types
+const COLOR_MAP: Record<string, { text: string; bg: string }> = {
+  slate: { text: 'text-slate-400', bg: 'bg-slate-500/20' },
+  gray: { text: 'text-gray-400', bg: 'bg-gray-500/20' },
+  red: { text: 'text-red-400', bg: 'bg-red-500/20' },
+  orange: { text: 'text-orange-400', bg: 'bg-orange-500/20' },
+  amber: { text: 'text-amber-400', bg: 'bg-amber-500/20' },
+  yellow: { text: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+  lime: { text: 'text-lime-400', bg: 'bg-lime-500/20' },
+  green: { text: 'text-green-400', bg: 'bg-green-500/20' },
+  emerald: { text: 'text-emerald-400', bg: 'bg-emerald-500/20' },
+  cyan: { text: 'text-cyan-400', bg: 'bg-cyan-500/20' },
+  blue: { text: 'text-blue-400', bg: 'bg-blue-500/20' },
+  indigo: { text: 'text-indigo-400', bg: 'bg-indigo-500/20' },
+  violet: { text: 'text-violet-400', bg: 'bg-violet-500/20' },
+  purple: { text: 'text-purple-400', bg: 'bg-purple-500/20' },
+  fuchsia: { text: 'text-fuchsia-400', bg: 'bg-fuchsia-500/20' },
+  pink: { text: 'text-pink-400', bg: 'bg-pink-500/20' },
+  rose: { text: 'text-rose-400', bg: 'bg-rose-500/20' },
+  stone: { text: 'text-stone-400', bg: 'bg-stone-500/20' },
+  teal: { text: 'text-teal-400', bg: 'bg-teal-500/20' },
+};
 
 const DAY_KEYS: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 interface DayWorkoutItem {
   id: string;
-  type: WorkoutType;
+  type: string;
   hours: number;
 }
 
@@ -67,6 +86,9 @@ type DaySchedule = DayWorkoutItem[];
 
 export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarProps) {
   const { t } = useTranslation();
+  
+  const [workoutTypes, setWorkoutTypes] = useState<WorkoutTypeOption[]>([]);
+  const [isLoadingTypes, setIsLoadingTypes] = useState(true);
   
   const [schedule, setSchedule] = useState<Record<DayOfWeek, DaySchedule>>({
     monday: [],
@@ -80,12 +102,38 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
 
   const [selectedDay, setSelectedDay] = useState<DayOfWeek | null>(null);
   const [addingWorkout, setAddingWorkout] = useState(false);
-  const [newWorkoutType, setNewWorkoutType] = useState<WorkoutType>('strength');
+  const [newWorkoutType, setNewWorkoutType] = useState<string>('strength');
   const [newWorkoutHours, setNewWorkoutHours] = useState(1);
+
+  // Fetch workout types from API
+  useEffect(() => {
+    const fetchWorkoutTypes = async () => {
+      setIsLoadingTypes(true);
+      const response = await macroService.getWorkoutTypes();
+      if (response.success && response.data) {
+        setWorkoutTypes(response.data);
+        // Set default workout type to first non-rest type
+        const firstNonRest = response.data.find(t => t.key !== 'rest');
+        if (firstNonRest) {
+          setNewWorkoutType(firstNonRest.key);
+        }
+      }
+      setIsLoadingTypes(false);
+    };
+    fetchWorkoutTypes();
+  }, []);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const getWorkoutLabel = (type: WorkoutType) => t(`calendar.workouts.${type}`);
+  const getWorkoutLabel = (typeKey: string) => {
+    const workoutType = workoutTypes.find(t => t.key === typeKey);
+    if (workoutType) {
+      return workoutType.name;
+    }
+    // Fallback to translation
+    return t(`calendar.workouts.${typeKey}`, typeKey);
+  };
+
   const getDayLabel = (day: DayOfWeek) => t(`calendar.days.${day}`);
   const getDayShort = (day: DayOfWeek) => {
     const shortMap: Record<DayOfWeek, string> = {
@@ -111,7 +159,9 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
       [day]: [...prev[day], newWorkout],
     }));
     setAddingWorkout(false);
-    setNewWorkoutType('strength');
+    // Reset to first non-rest type
+    const firstNonRest = workoutTypes.find(t => t.key !== 'rest');
+    setNewWorkoutType(firstNonRest?.key || 'strength');
     setNewWorkoutHours(1);
   };
 
@@ -147,97 +197,156 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
     onSubmit(workouts);
   };
 
-  const getWorkoutInfo = (type: WorkoutType) => {
-    return WORKOUT_TYPE_CONFIG.find((w) => w.type === type) || WORKOUT_TYPE_CONFIG[0];
+  const getWorkoutInfo = (typeKey: string) => {
+    const workoutType = workoutTypes.find(t => t.key === typeKey);
+    const IconComponent = workoutType?.icon ? ICON_MAP[workoutType.icon] || Dumbbell : Dumbbell;
+    const colors = workoutType?.color ? COLOR_MAP[workoutType.color] || COLOR_MAP.gray : COLOR_MAP.gray;
+    
+    return {
+      icon: IconComponent,
+      color: colors.text,
+      bgColor: colors.bg,
+      intensity: workoutType?.intensity || 1.0,
+    };
   };
 
   const workoutDays = Object.values(schedule).filter((d) => d.length > 0).length;
-  const totalWorkouts = Object.values(schedule).reduce((sum, d) => sum + d.length, 0);
-  const totalHours = Object.values(schedule).reduce(
-    (sum, d) => sum + d.reduce((s, w) => s + w.hours, 0),
-    0
-  );
+
+  if (isLoadingTypes) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+      </div>
+    );
+  }
+
+  // Filter out rest from selectable workout types (rest is implied when no workouts)
+  const selectableWorkoutTypes = workoutTypes.filter(t => t.key !== 'rest');
 
   return (
-    <div className="space-y-6">
-      {/* Weekly Overview */}
-      <div className="grid grid-cols-7 gap-2">
-        {DAY_KEYS.map((key) => {
-          const dayWorkouts = schedule[key];
+    <div className="max-w-4xl mx-auto animate-fadeIn">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+          {t('calendar.title')}
+        </h2>
+        <p className="text-slate-400">
+          {t('calendar.subtitle')}
+        </p>
+      </div>
+
+      {/* Calendar Grid */}
+      <div className="grid grid-cols-7 gap-2 mb-8">
+        {/* Day Headers */}
+        {DAY_KEYS.map((day) => (
+          <div
+            key={day}
+            className="text-center text-xs md:text-sm font-medium text-slate-400 pb-2"
+          >
+            <span className="hidden md:inline">{getDayLabel(day)}</span>
+            <span className="md:hidden">{getDayShort(day)}</span>
+          </div>
+        ))}
+
+        {/* Day Cards */}
+        {DAY_KEYS.map((day) => {
+          const dayWorkouts = schedule[day];
           const hasWorkouts = dayWorkouts.length > 0;
-          const isSelected = selectedDay === key;
-          const primaryWorkout = hasWorkouts ? getWorkoutInfo(dayWorkouts[0].type) : getWorkoutInfo('rest');
-          const Icon = primaryWorkout.icon;
+          const isSelected = selectedDay === day;
 
           return (
             <button
-              key={key}
-              type="button"
-              onClick={() => setSelectedDay(isSelected ? null : key)}
-              className={`flex flex-col items-center p-3 rounded-xl transition-all ${
-                isSelected
-                  ? 'ring-2 ring-emerald-500 bg-slate-700/50'
-                  : 'hover:bg-slate-700/30'
-              } ${hasWorkouts ? primaryWorkout.bgColor : 'bg-slate-500/10'}`}
+              key={day}
+              onClick={() => {
+                setSelectedDay(isSelected ? null : day);
+                setAddingWorkout(false);
+              }}
+              className={`
+                relative aspect-square rounded-xl border-2 transition-all p-2
+                flex flex-col items-center justify-center gap-1
+                ${isSelected
+                  ? 'border-emerald-500 bg-emerald-500/10'
+                  : hasWorkouts
+                    ? 'border-slate-600 bg-slate-800/50 hover:border-slate-500'
+                    : 'border-slate-700 bg-slate-800/30 hover:border-slate-600'
+                }
+              `}
             >
-              <span className="text-xs text-slate-400 mb-1">{getDayShort(key)}</span>
-              <div className={`p-2 rounded-lg ${primaryWorkout.bgColor} relative`}>
-                <Icon className={`w-5 h-5 ${primaryWorkout.color}`} />
-                {dayWorkouts.length > 1 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                    {dayWorkouts.length}
-                  </span>
-                )}
-              </div>
-              {hasWorkouts && (
-                <span className="text-xs text-slate-300 mt-1">
-                  {dayWorkouts.reduce((s, w) => s + w.hours, 0)}h
-                </span>
+              {hasWorkouts ? (
+                <div className="flex flex-wrap gap-1 justify-center">
+                  {dayWorkouts.slice(0, 3).map((w) => {
+                    const info = getWorkoutInfo(w.type);
+                    const Icon = info.icon;
+                    return (
+                      <div
+                        key={w.id}
+                        className={`w-6 h-6 md:w-8 md:h-8 rounded-lg ${info.bgColor} flex items-center justify-center`}
+                      >
+                        <Icon className={`w-3 h-3 md:w-4 md:h-4 ${info.color}`} />
+                      </div>
+                    );
+                  })}
+                  {dayWorkouts.length > 3 && (
+                    <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-slate-700 flex items-center justify-center text-xs text-slate-400">
+                      +{dayWorkouts.length - 3}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <Moon className="w-5 h-5 md:w-6 md:h-6 text-slate-600" />
+                  <span className="text-xs text-slate-600 mt-1">{t('calendar.rest')}</span>
+                </div>
               )}
             </button>
           );
         })}
       </div>
 
-      {/* Selected Day Editor */}
+      {/* Day Detail Panel */}
       {selectedDay && (
-        <div className="bg-slate-700/30 rounded-xl p-5 border border-slate-600/50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 p-6 mb-8 animate-slideUp">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold capitalize">
+            <h3 className="text-xl font-semibold text-white">
               {getDayLabel(selectedDay)}
             </h3>
             <button
-              type="button"
               onClick={() => setSelectedDay(null)}
-              className="text-slate-400 hover:text-white"
+              className="p-2 text-slate-400 hover:text-white transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Current Workouts List */}
-          {schedule[selectedDay].length > 0 && (
-            <div className="space-y-2 mb-4">
+          {/* Workouts List */}
+          {schedule[selectedDay].length > 0 ? (
+            <div className="space-y-3 mb-4">
               {schedule[selectedDay].map((workout) => {
                 const info = getWorkoutInfo(workout.type);
                 const Icon = info.icon;
                 return (
                   <div
                     key={workout.id}
-                    className={`flex items-center justify-between p-3 rounded-lg ${info.bgColor}`}
+                    className="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl"
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className={`w-5 h-5 ${info.color}`} />
-                      <span className={`font-medium ${info.color}`}>{getWorkoutLabel(workout.type)}</span>
-                      <span className="text-slate-400 text-sm flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {workout.hours}h
-                      </span>
+                      <div className={`w-10 h-10 rounded-xl ${info.bgColor} flex items-center justify-center`}>
+                        <Icon className={`w-5 h-5 ${info.color}`} />
+                      </div>
+                      <div>
+                        <p className="font-medium text-white">{getWorkoutLabel(workout.type)}</p>
+                        <p className="text-sm text-slate-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {workout.hours} {t('calendar.hours')}
+                          <span className="ml-2 text-xs opacity-60">
+                            ({info.intensity.toFixed(1)}x intensity)
+                          </span>
+                        </p>
+                      </div>
                     </div>
                     <button
-                      type="button"
                       onClick={() => removeWorkout(selectedDay, workout.id)}
-                      className="text-slate-400 hover:text-red-400 transition-colors"
+                      className="p-2 text-slate-400 hover:text-red-400 transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -245,41 +354,46 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
                 );
               })}
             </div>
+          ) : (
+            <p className="text-slate-500 mb-4">{t('calendar.noWorkouts')}</p>
           )}
 
           {/* Add Workout Form */}
           {addingWorkout ? (
-            <div className="space-y-4 p-4 bg-slate-800/50 rounded-xl">
-              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-40 overflow-y-auto pr-1">
-                {WORKOUT_TYPE_CONFIG.filter((w) => w.type !== 'rest').map(({ type, icon: Icon, color, bgColor }) => {
-                  const isActive = newWorkoutType === type;
-                  return (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setNewWorkoutType(type)}
-                      className={`flex flex-col items-center p-2 rounded-xl transition-all ${
-                        isActive
-                          ? `${bgColor} ring-2 ring-offset-1 ring-offset-slate-800 ${color.replace('text-', 'ring-')}`
-                          : 'bg-slate-700/50 hover:bg-slate-600/50'
-                      }`}
-                    >
-                      <Icon className={`w-4 h-4 mb-1 ${isActive ? color : 'text-slate-500'}`} />
-                      <span className={`text-xs ${isActive ? color : 'text-slate-500'}`}>
-                        {getWorkoutLabel(type)}
-                      </span>
-                    </button>
-                  );
-                })}
+            <div className="bg-slate-900/50 rounded-xl p-4 space-y-4">
+              <div>
+                <label className="block text-sm text-slate-400 mb-2">{t('calendar.workoutType')}</label>
+                <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                  {selectableWorkoutTypes.map((type) => {
+                    const IconComponent = type.icon ? ICON_MAP[type.icon] || Dumbbell : Dumbbell;
+                    const colors = type.color ? COLOR_MAP[type.color] || COLOR_MAP.gray : COLOR_MAP.gray;
+                    const isSelected = newWorkoutType === type.key;
+                    return (
+                      <button
+                        key={type.key}
+                        onClick={() => setNewWorkoutType(type.key)}
+                        title={`${type.name} (${type.intensity.toFixed(1)}x)`}
+                        className={`
+                          flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all
+                          ${isSelected
+                            ? `border-emerald-500 ${colors.bg}`
+                            : 'border-transparent bg-slate-800 hover:bg-slate-700'
+                          }
+                        `}
+                      >
+                        <IconComponent className={`w-5 h-5 ${isSelected ? colors.text : 'text-slate-400'}`} />
+                        <span className={`text-xs mt-1 truncate max-w-full ${isSelected ? 'text-white' : 'text-slate-500'}`}>
+                          {type.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Duration */}
               <div>
-                <label className="flex items-center gap-2 text-sm text-slate-400 mb-2">
-                  <Clock className="w-4 h-4" />
-                  {t('calendar.duration')} ({t('calendar.hours')})
-                </label>
-                <div className="flex items-center gap-3">
+                <label className="block text-sm text-slate-400 mb-2">{t('calendar.duration')}</label>
+                <div className="flex items-center gap-4">
                   <input
                     type="range"
                     min="0.5"
@@ -287,27 +401,24 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
                     step="0.5"
                     value={newWorkoutHours}
                     onChange={(e) => setNewWorkoutHours(parseFloat(e.target.value))}
-                    className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                    className="flex-1 accent-emerald-500"
                   />
-                  <span className="w-16 text-center px-3 py-2 bg-slate-800 rounded-lg text-emerald-400 font-semibold">
+                  <span className="text-white font-medium w-16 text-center">
                     {newWorkoutHours}h
                   </span>
                 </div>
               </div>
 
-              {/* Add/Cancel Buttons */}
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button
-                  type="button"
                   onClick={() => setAddingWorkout(false)}
-                  className="flex-1 py-2 text-sm text-slate-400 hover:text-white transition-colors border border-slate-600 rounded-lg"
+                  className="flex-1 py-2 text-slate-400 hover:text-white transition-colors"
                 >
-                  {t('calendar.back')}
+                  {t('common.cancel')}
                 </button>
                 <button
-                  type="button"
                   onClick={() => addWorkout(selectedDay)}
-                  className="flex-1 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+                  className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors"
                 >
                   {t('calendar.addWorkout')}
                 </button>
@@ -315,9 +426,8 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
             </div>
           ) : (
             <button
-              type="button"
               onClick={() => setAddingWorkout(true)}
-              className="w-full py-3 border-2 border-dashed border-slate-600 hover:border-emerald-500 text-slate-400 hover:text-emerald-400 rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 border-2 border-dashed border-slate-600 hover:border-emerald-500 rounded-xl text-slate-400 hover:text-emerald-400 transition-all flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
               {t('calendar.addWorkout')}
@@ -326,43 +436,30 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
         </div>
       )}
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-slate-700/30 rounded-xl p-4 text-center">
-          <div className="text-3xl font-bold text-emerald-400">{workoutDays}</div>
-          <div className="text-sm text-slate-400">{t('calendar.days.monday').split(' ')[0]}s</div>
-        </div>
-        <div className="bg-slate-700/30 rounded-xl p-4 text-center">
-          <div className="text-3xl font-bold text-cyan-400">{totalWorkouts}</div>
-          <div className="text-sm text-slate-400">Workouts</div>
-        </div>
-        <div className="bg-slate-700/30 rounded-xl p-4 text-center">
-          <div className="text-3xl font-bold text-amber-400">{totalHours}</div>
-          <div className="text-sm text-slate-400">{t('calendar.hours')}</div>
-        </div>
+      {/* Summary */}
+      <div className="flex items-center justify-between text-slate-400 mb-8">
+        <span>
+          {t('calendar.workoutDays')}: <span className="text-white font-medium">{workoutDays}</span>
+        </span>
+        <span>
+          {t('calendar.restDays')}: <span className="text-white font-medium">{7 - workoutDays}</span>
+        </span>
       </div>
 
-      {/* Instructions */}
-      <p className="text-center text-slate-500 text-sm">
-        {t('calendar.description')}
-      </p>
-
-      {/* Action Buttons */}
-      <div className="flex gap-3 pt-4">
+      {/* Navigation */}
+      <div className="flex gap-4">
         <button
-          type="button"
           onClick={onBack}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl transition-colors"
+          className="flex items-center gap-2 px-6 py-3 text-slate-400 hover:text-white transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
-          {t('calendar.back')}
+          <ArrowLeft className="w-5 h-5" />
+          {t('common.back')}
         </button>
         <button
-          type="button"
           onClick={handleSubmit}
-          className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/25"
+          className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/25"
         >
-          {t('calendar.calculateMacros')}
+          {t('calendar.calculate')}
         </button>
       </div>
     </div>

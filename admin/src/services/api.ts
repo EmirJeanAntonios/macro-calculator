@@ -37,6 +37,39 @@ export interface ConfigItem {
 
 export type ConfigMap = Record<string, ConfigItem[]>;
 
+export interface WorkoutCategory {
+  id: string;
+  key: string;
+  name: string;
+  intensity: number | string;
+  icon: string | null;
+  color: string | null;
+  description: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  isDefault: boolean;
+}
+
+export interface CreateWorkoutCategoryDto {
+  key: string;
+  name: string;
+  intensity: number;
+  icon?: string;
+  color?: string;
+  description?: string;
+  sortOrder?: number;
+}
+
+export interface UpdateWorkoutCategoryDto {
+  name?: string;
+  intensity?: number;
+  icon?: string;
+  color?: string;
+  description?: string;
+  sortOrder?: number;
+  isActive?: boolean;
+}
+
 const api = axios.create({
   baseURL: '/api/admin',
   headers: {
@@ -176,6 +209,62 @@ export const adminService = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         return { success: false, error: error.response?.data?.message || 'Failed to update configurations' };
+      }
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  },
+
+  // ============ WORKOUT CATEGORIES ============
+
+  // Get all workout categories
+  getWorkoutCategories: async (includeInactive = true): Promise<ApiResponse<WorkoutCategory[]>> => {
+    try {
+      const response = await api.get<BackendResponse<WorkoutCategory[]>>('/workout-categories', {
+        params: { includeInactive: includeInactive.toString() },
+      });
+      return { success: true, data: response.data.data };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return { success: false, error: error.response?.data?.message || 'Failed to fetch workout categories' };
+      }
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  },
+
+  // Create workout category
+  createWorkoutCategory: async (dto: CreateWorkoutCategoryDto): Promise<ApiResponse<WorkoutCategory>> => {
+    try {
+      const response = await api.post<BackendResponse<WorkoutCategory>>('/workout-categories', dto);
+      return { success: true, data: response.data.data };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return { success: false, error: error.response?.data?.message || 'Failed to create workout category' };
+      }
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  },
+
+  // Update workout category
+  updateWorkoutCategory: async (id: string, dto: UpdateWorkoutCategoryDto): Promise<ApiResponse<WorkoutCategory>> => {
+    try {
+      const response = await api.put<BackendResponse<WorkoutCategory>>(`/workout-categories/${id}`, dto);
+      return { success: true, data: response.data.data };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return { success: false, error: error.response?.data?.message || 'Failed to update workout category' };
+      }
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  },
+
+  // Delete workout category
+  deleteWorkoutCategory: async (id: string): Promise<ApiResponse<{ deleted: boolean }>> => {
+    try {
+      const response = await api.delete<BackendResponse<{ deleted: boolean }>>(`/workout-categories/${id}`);
+      return { success: true, data: response.data.data };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return { success: false, error: error.response?.data?.message || 'Failed to delete workout category' };
       }
       return { success: false, error: 'An unexpected error occurred' };
     }

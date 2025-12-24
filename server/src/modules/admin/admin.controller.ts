@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { LoginDto, UpdateConfigDto } from './dto';
+import { LoginDto, UpdateConfigDto, CreateWorkoutCategoryDto, UpdateWorkoutCategoryDto } from './dto';
 
 @Controller('admin')
 export class AdminController {
@@ -108,6 +108,67 @@ export class AdminController {
     return {
       success: true,
       data: configs,
+    };
+  }
+
+  // ============ WORKOUT CATEGORIES ============
+
+  /**
+   * GET /api/admin/workout-categories
+   * Get all workout categories
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('workout-categories')
+  async getAllWorkoutCategories(@Query('includeInactive') includeInactive = 'false') {
+    const categories = await this.adminService.getAllWorkoutCategories(includeInactive === 'true');
+    return {
+      success: true,
+      data: categories,
+    };
+  }
+
+  /**
+   * POST /api/admin/workout-categories
+   * Create a new workout category
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('workout-categories')
+  async createWorkoutCategory(@Body() dto: CreateWorkoutCategoryDto) {
+    const category = await this.adminService.createWorkoutCategory(dto);
+    return {
+      success: true,
+      data: category,
+    };
+  }
+
+  /**
+   * PUT /api/admin/workout-categories/:id
+   * Update a workout category
+   */
+  @UseGuards(JwtAuthGuard)
+  @Put('workout-categories/:id')
+  async updateWorkoutCategory(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateWorkoutCategoryDto,
+  ) {
+    const category = await this.adminService.updateWorkoutCategory(id, dto);
+    return {
+      success: true,
+      data: category,
+    };
+  }
+
+  /**
+   * DELETE /api/admin/workout-categories/:id
+   * Delete a workout category
+   */
+  @UseGuards(JwtAuthGuard)
+  @Delete('workout-categories/:id')
+  async deleteWorkoutCategory(@Param('id', ParseUUIDPipe) id: string) {
+    const result = await this.adminService.deleteWorkoutCategory(id);
+    return {
+      success: true,
+      ...result,
     };
   }
 }

@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import RecordsPage from './pages/RecordsPage';
 import ConfigPage from './pages/ConfigPage';
+import WorkoutTypesPage from './pages/WorkoutTypesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -32,6 +33,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ConfigPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workout-types"
+            element={
+              <ProtectedRoute>
+                <WorkoutTypesPage />
               </ProtectedRoute>
             }
           />

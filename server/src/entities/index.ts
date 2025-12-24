@@ -3,4 +3,5 @@ export * from './workout.entity';
 export * from './macro-result.entity';
 export * from './admin.entity';
 export * from './configuration.entity';
+export * from './workout-category.entity';
 

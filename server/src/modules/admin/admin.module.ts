@@ -3,14 +3,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Admin, Configuration, MacroResult } from '../../entities';
+import { Admin, Configuration, MacroResult, WorkoutCategory } from '../../entities';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Admin, Configuration, MacroResult]),
+    TypeOrmModule.forFeature([Admin, Configuration, MacroResult, WorkoutCategory]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

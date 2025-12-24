@@ -8,6 +8,7 @@ import {
   Calculator,
   User,
   ExternalLink,
+  Dumbbell,
 } from 'lucide-react';
 import { adminService } from '../services/api';
 
@@ -18,6 +19,7 @@ interface AdminLayoutProps {
 const NAV_ITEMS = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/records', icon: Database, label: 'Records' },
+  { path: '/workout-types', icon: Dumbbell, label: 'Workout Types' },
   { path: '/config', icon: Settings, label: 'Configuration' },
 ];
 

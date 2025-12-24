@@ -10,14 +10,16 @@ import {
   HeightUnit,
   Goal,
   Gender,
-  WorkoutType,
   Configuration,
+  WorkoutCategory,
 } from '../../entities';
 
 @Injectable()
 export class MacroCalculatorService {
   private configCache: Record<string, number> = {};
   private configCacheTime = 0;
+  private intensityCache: Record<string, number> = {};
+  private intensityCacheTime = 0;
   private readonly CACHE_TTL = 60000; // 1 minute cache
 
   constructor(
@@ -29,6 +31,8 @@ export class MacroCalculatorService {
     private macroResultRepository: Repository<MacroResult>,
     @InjectRepository(Configuration)
     private configRepository: Repository<Configuration>,
+    @InjectRepository(WorkoutCategory)
+    private workoutCategoryRepository: Repository<WorkoutCategory>,
   ) {}
 
   /**
@@ -47,6 +51,44 @@ export class MacroCalculatorService {
     }, {} as Record<string, number>);
     this.configCacheTime = now;
     return this.configCache;
+  }
+
+  /**
+   * Load workout intensity values from database with caching
+   */
+  private async loadIntensityMap(): Promise<Record<string, number>> {
+    const now = Date.now();
+    if (now - this.intensityCacheTime < this.CACHE_TTL && Object.keys(this.intensityCache).length > 0) {
+      return this.intensityCache;
+    }
+
+    const categories = await this.workoutCategoryRepository.find({
+      where: { isActive: true },
+    });
+    this.intensityCache = categories.reduce((acc, c) => {
+      acc[c.key] = Number(c.intensity);
+      return acc;
+    }, {} as Record<string, number>);
+    this.intensityCacheTime = now;
+    return this.intensityCache;
+  }
+
+  /**
+   * Get all active workout types for the frontend
+   */
+  async getWorkoutTypes() {
+    const categories = await this.workoutCategoryRepository.find({
+      where: { isActive: true },
+      order: { sortOrder: 'ASC', name: 'ASC' },
+    });
+    return categories.map(c => ({
+      key: c.key,
+      name: c.name,
+      intensity: Number(c.intensity),
+      icon: c.icon,
+      color: c.color,
+      description: c.description,
+    }));
   }
 
   /**
@@ -149,33 +191,11 @@ export class MacroCalculatorService {
   }
 
   /**
-   * Get intensity multiplier for each workout type from config
+   * Get intensity multiplier for a workout type from the dynamic intensity map
    */
-  private getWorkoutIntensity(type: WorkoutType, config: Record<string, number>): number {
-    const intensityKey = `intensity_${type}`;
-    
-    // Fallback values if not in config
-    const fallbackMap: Record<WorkoutType, number> = {
-      [WorkoutType.REST]: 0,
-      [WorkoutType.WALKING]: 0.5,
-      [WorkoutType.YOGA]: 0.6,
-      [WorkoutType.PILATES]: 0.7,
-      [WorkoutType.CYCLING]: 0.9,
-      [WorkoutType.DANCE]: 0.9,
-      [WorkoutType.SWIMMING]: 1.0,
-      [WorkoutType.STRENGTH]: 1.0,
-      [WorkoutType.CARDIO]: 1.1,
-      [WorkoutType.RUNNING]: 1.2,
-      [WorkoutType.CLIMBING]: 1.2,
-      [WorkoutType.SPORTS]: 1.2,
-      [WorkoutType.MARTIAL_ARTS]: 1.4,
-      [WorkoutType.BOXING]: 1.5,
-      [WorkoutType.HIIT]: 1.6,
-      [WorkoutType.CROSSFIT]: 1.7,
-      [WorkoutType.OTHER]: 1.0,
-    };
-
-    return config[intensityKey] ?? fallbackMap[type] ?? 1.0;
+  private getWorkoutIntensity(type: string, intensityMap: Record<string, number>): number {
+    // Return intensity from map, default to 1.0 if not found
+    return intensityMap[type] ?? 1.0;
   }
 
   /**
@@ -186,11 +206,15 @@ export class MacroCalculatorService {
     workouts: WorkoutDto[],
     config: Record<string, number>,
   ): Promise<number> {
-    const workoutDays = workouts.filter(w => w.type !== WorkoutType.REST);
+    // Load intensity map from workout categories
+    const intensityMap = await this.loadIntensityMap();
+    
+    // Filter out rest days
+    const workoutDays = workouts.filter(w => w.type !== 'rest');
     
     // Calculate intensity-weighted hours
     const weightedHours = workoutDays.reduce((sum, w) => {
-      const intensity = this.getWorkoutIntensity(w.type, config);
+      const intensity = this.getWorkoutIntensity(w.type, intensityMap);
       return sum + (w.hours * intensity);
     }, 0);
     

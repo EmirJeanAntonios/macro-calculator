@@ -17,6 +17,7 @@ export enum DayOfWeek {
   SUNDAY = 'sunday',
 }
 
+// Keep enum for backwards compatibility but type field is now a string
 export enum WorkoutType {
   REST = 'rest',
   CARDIO = 'cardio',
@@ -48,12 +49,8 @@ export class Workout {
   })
   day: DayOfWeek;
 
-  @Column({
-    type: 'enum',
-    enum: WorkoutType,
-    default: WorkoutType.REST,
-  })
-  type: WorkoutType;
+  @Column({ type: 'varchar', length: 50, default: 'rest' })
+  type: string; // Now a dynamic string to support custom workout types
 
   @Column({ type: 'decimal', precision: 3, scale: 1, default: 0 })
   hours: number;
@@ -70,4 +67,3 @@ export class Workout {
   @Column({ name: 'user_input_id' })
   userInputId: string;
 }
-
