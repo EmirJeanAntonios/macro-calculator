@@ -11,7 +11,7 @@ A full-stack application for calculating personalized macros based on user input
 - **Workout Calendar** - Interactive weekly schedule with multiple workout types
 - **Special Day Macros** - Different macros for workout vs rest days
 - **PDF Export** - Download your personalized macro plan
-- **Modern UI** - Beautiful responsive design with Tailwind CSS
+- **Modern UI** - responsive design with Tailwind CSS
 
 ## 🛠️ Tech Stack
 
