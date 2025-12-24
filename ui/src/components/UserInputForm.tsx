@@ -18,20 +18,31 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
     goal: initialData?.goal || 'maintenance',
   });
 
+  // Separate string state for number inputs to allow empty values while typing
+  const [inputValues, setInputValues] = useState({
+    age: String(initialData?.age || 25),
+    weight: String(initialData?.weight || 70),
+    height: String(initialData?.height || 170),
+  });
+
   const [errors, setErrors] = useState<Partial<Record<keyof UserInput, string>>>({});
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof UserInput, string>> = {};
 
-    if (formData.age < 13 || formData.age > 120) {
+    const age = parseFloat(inputValues.age) || 0;
+    const weight = parseFloat(inputValues.weight) || 0;
+    const height = parseFloat(inputValues.height) || 0;
+
+    if (age < 13 || age > 120) {
       newErrors.age = 'Age must be between 13 and 120';
     }
 
-    if (formData.weight <= 0 || formData.weight > 700) {
+    if (weight <= 0 || weight > 700) {
       newErrors.weight = 'Please enter a valid weight';
     }
 
-    if (formData.height <= 0 || formData.height > 300) {
+    if (height <= 0 || height > 300) {
       newErrors.height = 'Please enter a valid height';
     }
 
@@ -41,13 +52,29 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Update formData with parsed values before validation
+    const updatedFormData = {
+      ...formData,
+      age: parseInt(inputValues.age) || 0,
+      weight: parseFloat(inputValues.weight) || 0,
+      height: parseFloat(inputValues.height) || 0,
+    };
+    setFormData(updatedFormData);
+    
     if (validateForm()) {
-      onSubmit(formData);
+      onSubmit(updatedFormData);
     }
   };
 
   const updateField = <K extends keyof UserInput>(field: K, value: UserInput[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const updateNumberInput = (field: 'age' | 'weight' | 'height', value: string) => {
+    setInputValues((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
@@ -65,8 +92,8 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
           </label>
           <input
             type="number"
-            value={formData.age}
-            onChange={(e) => updateField('age', parseInt(e.target.value) || 0)}
+            value={inputValues.age}
+            onChange={(e) => updateNumberInput('age', e.target.value)}
             className={`w-full px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
               errors.age
                 ? 'border-red-500 focus:ring-red-500/50'
@@ -109,8 +136,8 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
         <div className="flex gap-3">
           <input
             type="number"
-            value={formData.weight}
-            onChange={(e) => updateField('weight', parseFloat(e.target.value) || 0)}
+            value={inputValues.weight}
+            onChange={(e) => updateNumberInput('weight', e.target.value)}
             className={`flex-1 px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
               errors.weight
                 ? 'border-red-500 focus:ring-red-500/50'
@@ -140,8 +167,8 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
         <div className="flex gap-3">
           <input
             type="number"
-            value={formData.height}
-            onChange={(e) => updateField('height', parseFloat(e.target.value) || 0)}
+            value={inputValues.height}
+            onChange={(e) => updateNumberInput('height', e.target.value)}
             className={`flex-1 px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
               errors.height
                 ? 'border-red-500 focus:ring-red-500/50'
