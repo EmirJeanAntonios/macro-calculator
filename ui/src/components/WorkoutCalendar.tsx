@@ -19,6 +19,8 @@ import {
   TreePine,
   Mountain,
   Swords,
+  Plus,
+  X,
 } from 'lucide-react';
 import type { Workout, DayOfWeek, WorkoutType } from '../types';
 
@@ -165,39 +167,78 @@ const WORKOUT_TYPES: {
   },
 ];
 
-interface DayWorkout {
+interface DayWorkoutItem {
+  id: string;
   type: WorkoutType;
   hours: number;
-  notes?: string;
 }
 
+type DaySchedule = DayWorkoutItem[];
+
 export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarProps) {
-  const [schedule, setSchedule] = useState<Record<DayOfWeek, DayWorkout>>({
-    monday: { type: 'rest', hours: 0 },
-    tuesday: { type: 'rest', hours: 0 },
-    wednesday: { type: 'rest', hours: 0 },
-    thursday: { type: 'rest', hours: 0 },
-    friday: { type: 'rest', hours: 0 },
-    saturday: { type: 'rest', hours: 0 },
-    sunday: { type: 'rest', hours: 0 },
+  const [schedule, setSchedule] = useState<Record<DayOfWeek, DaySchedule>>({
+    monday: [],
+    tuesday: [],
+    wednesday: [],
+    thursday: [],
+    friday: [],
+    saturday: [],
+    sunday: [],
   });
 
   const [selectedDay, setSelectedDay] = useState<DayOfWeek | null>(null);
+  const [addingWorkout, setAddingWorkout] = useState(false);
+  const [newWorkoutType, setNewWorkoutType] = useState<WorkoutType>('strength');
+  const [newWorkoutHours, setNewWorkoutHours] = useState(1);
 
-  const updateDay = (day: DayOfWeek, updates: Partial<DayWorkout>) => {
+  const generateId = () => Math.random().toString(36).substr(2, 9);
+
+  const addWorkout = (day: DayOfWeek) => {
+    const newWorkout: DayWorkoutItem = {
+      id: generateId(),
+      type: newWorkoutType,
+      hours: newWorkoutHours,
+    };
     setSchedule((prev) => ({
       ...prev,
-      [day]: { ...prev[day], ...updates },
+      [day]: [...prev[day], newWorkout],
+    }));
+    setAddingWorkout(false);
+    setNewWorkoutType('strength');
+    setNewWorkoutHours(1);
+  };
+
+  const removeWorkout = (day: DayOfWeek, workoutId: string) => {
+    setSchedule((prev) => ({
+      ...prev,
+      [day]: prev[day].filter((w) => w.id !== workoutId),
     }));
   };
 
   const handleSubmit = () => {
-    const workouts: Workout[] = DAYS.map(({ key }) => ({
-      day: key,
-      type: schedule[key].type,
-      hours: schedule[key].type === 'rest' ? 0 : schedule[key].hours,
-      notes: schedule[key].notes,
-    }));
+    const workouts: Workout[] = [];
+    
+    DAYS.forEach(({ key }) => {
+      const dayWorkouts = schedule[key];
+      if (dayWorkouts.length === 0) {
+        // Add a rest day if no workouts
+        workouts.push({
+          day: key,
+          type: 'rest',
+          hours: 0,
+        });
+      } else {
+        // Add each workout for the day
+        dayWorkouts.forEach((w) => {
+          workouts.push({
+            day: key,
+            type: w.type,
+            hours: w.hours,
+          });
+        });
+      }
+    });
+    
     onSubmit(workouts);
   };
 
@@ -205,18 +246,23 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
     return WORKOUT_TYPES.find((w) => w.type === type) || WORKOUT_TYPES[0];
   };
 
-  const workoutDays = Object.values(schedule).filter((d) => d.type !== 'rest').length;
-  const totalHours = Object.values(schedule).reduce((sum, d) => sum + (d.type !== 'rest' ? d.hours : 0), 0);
+  const workoutDays = Object.values(schedule).filter((d) => d.length > 0).length;
+  const totalWorkouts = Object.values(schedule).reduce((sum, d) => sum + d.length, 0);
+  const totalHours = Object.values(schedule).reduce(
+    (sum, d) => sum + d.reduce((s, w) => s + w.hours, 0),
+    0
+  );
 
   return (
     <div className="space-y-6">
       {/* Weekly Overview */}
       <div className="grid grid-cols-7 gap-2">
         {DAYS.map(({ key, short }) => {
-          const dayData = schedule[key];
-          const workoutInfo = getWorkoutInfo(dayData.type);
-          const Icon = workoutInfo.icon;
+          const dayWorkouts = schedule[key];
+          const hasWorkouts = dayWorkouts.length > 0;
           const isSelected = selectedDay === key;
+          const primaryWorkout = hasWorkouts ? getWorkoutInfo(dayWorkouts[0].type) : getWorkoutInfo('rest');
+          const Icon = primaryWorkout.icon;
 
           return (
             <button
@@ -227,14 +273,21 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
                 isSelected
                   ? 'ring-2 ring-emerald-500 bg-slate-700/50'
                   : 'hover:bg-slate-700/30'
-              } ${workoutInfo.bgColor}`}
+              } ${hasWorkouts ? primaryWorkout.bgColor : 'bg-slate-500/10'}`}
             >
               <span className="text-xs text-slate-400 mb-1">{short}</span>
-              <div className={`p-2 rounded-lg ${workoutInfo.bgColor}`}>
-                <Icon className={`w-5 h-5 ${workoutInfo.color}`} />
+              <div className={`p-2 rounded-lg ${primaryWorkout.bgColor} relative`}>
+                <Icon className={`w-5 h-5 ${primaryWorkout.color}`} />
+                {dayWorkouts.length > 1 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                    {dayWorkouts.length}
+                  </span>
+                )}
               </div>
-              {dayData.type !== 'rest' && dayData.hours > 0 && (
-                <span className="text-xs text-slate-300 mt-1">{dayData.hours}h</span>
+              {hasWorkouts && (
+                <span className="text-xs text-slate-300 mt-1">
+                  {dayWorkouts.reduce((s, w) => s + w.hours, 0)}h
+                </span>
               )}
             </button>
           );
@@ -244,95 +297,152 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
       {/* Selected Day Editor */}
       {selectedDay && (
         <div className="bg-slate-700/30 rounded-xl p-5 border border-slate-600/50 animate-in fade-in slide-in-from-top-2 duration-200">
-          <h3 className="text-lg font-semibold mb-4 capitalize">
-            {DAYS.find((d) => d.key === selectedDay)?.label}
-          </h3>
-
-          {/* Workout Type Selector */}
-          <div className="mb-4">
-            <label className="block text-sm text-slate-400 mb-2">Workout Type</label>
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-48 overflow-y-auto pr-1">
-              {WORKOUT_TYPES.map(({ type, label, icon: Icon, color, bgColor }) => {
-                const isActive = schedule[selectedDay].type === type;
-                return (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => updateDay(selectedDay, { type, hours: type === 'rest' ? 0 : schedule[selectedDay].hours || 1 })}
-                    className={`flex flex-col items-center p-2 rounded-xl transition-all ${
-                      isActive
-                        ? `${bgColor} ring-2 ring-offset-1 ring-offset-slate-800 ${color.replace('text-', 'ring-')}`
-                        : 'bg-slate-800/50 hover:bg-slate-700/50'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 mb-1 ${isActive ? color : 'text-slate-500'}`} />
-                    <span className={`text-xs ${isActive ? color : 'text-slate-500'}`}>
-                      {label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Duration Input (only for non-rest days) */}
-          {schedule[selectedDay].type !== 'rest' && (
-            <div className="mb-4">
-              <label className="flex items-center gap-2 text-sm text-slate-400 mb-2">
-                <Clock className="w-4 h-4" />
-                Duration (hours)
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="range"
-                  min="0.5"
-                  max="4"
-                  step="0.5"
-                  value={schedule[selectedDay].hours}
-                  onChange={(e) => updateDay(selectedDay, { hours: parseFloat(e.target.value) })}
-                  className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-                />
-                <span className="w-16 text-center px-3 py-2 bg-slate-800 rounded-lg text-emerald-400 font-semibold">
-                  {schedule[selectedDay].hours}h
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Quick Actions */}
-          <div className="flex gap-2 pt-2">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold capitalize">
+              {DAYS.find((d) => d.key === selectedDay)?.label}
+            </h3>
             <button
               type="button"
               onClick={() => setSelectedDay(null)}
-              className="flex-1 py-2 text-sm text-slate-400 hover:text-white transition-colors"
+              className="text-slate-400 hover:text-white"
             >
-              Done
+              <X className="w-5 h-5" />
             </button>
           </div>
+
+          {/* Current Workouts List */}
+          {schedule[selectedDay].length > 0 && (
+            <div className="space-y-2 mb-4">
+              <label className="block text-sm text-slate-400">Workouts for this day</label>
+              {schedule[selectedDay].map((workout) => {
+                const info = getWorkoutInfo(workout.type);
+                const Icon = info.icon;
+                return (
+                  <div
+                    key={workout.id}
+                    className={`flex items-center justify-between p-3 rounded-lg ${info.bgColor}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className={`w-5 h-5 ${info.color}`} />
+                      <span className={`font-medium ${info.color}`}>{info.label}</span>
+                      <span className="text-slate-400 text-sm flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {workout.hours}h
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeWorkout(selectedDay, workout.id)}
+                      className="text-slate-400 hover:text-red-400 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Add Workout Form */}
+          {addingWorkout ? (
+            <div className="space-y-4 p-4 bg-slate-800/50 rounded-xl">
+              <label className="block text-sm text-slate-400">Select workout type</label>
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-40 overflow-y-auto pr-1">
+                {WORKOUT_TYPES.filter((w) => w.type !== 'rest').map(({ type, label, icon: Icon, color, bgColor }) => {
+                  const isActive = newWorkoutType === type;
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setNewWorkoutType(type)}
+                      className={`flex flex-col items-center p-2 rounded-xl transition-all ${
+                        isActive
+                          ? `${bgColor} ring-2 ring-offset-1 ring-offset-slate-800 ${color.replace('text-', 'ring-')}`
+                          : 'bg-slate-700/50 hover:bg-slate-600/50'
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 mb-1 ${isActive ? color : 'text-slate-500'}`} />
+                      <span className={`text-xs ${isActive ? color : 'text-slate-500'}`}>
+                        {label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Duration */}
+              <div>
+                <label className="flex items-center gap-2 text-sm text-slate-400 mb-2">
+                  <Clock className="w-4 h-4" />
+                  Duration (hours)
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="4"
+                    step="0.5"
+                    value={newWorkoutHours}
+                    onChange={(e) => setNewWorkoutHours(parseFloat(e.target.value))}
+                    className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                  />
+                  <span className="w-16 text-center px-3 py-2 bg-slate-800 rounded-lg text-emerald-400 font-semibold">
+                    {newWorkoutHours}h
+                  </span>
+                </div>
+              </div>
+
+              {/* Add/Cancel Buttons */}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAddingWorkout(false)}
+                  className="flex-1 py-2 text-sm text-slate-400 hover:text-white transition-colors border border-slate-600 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addWorkout(selectedDay)}
+                  className="flex-1 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+                >
+                  Add Workout
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAddingWorkout(true)}
+              className="w-full py-3 border-2 border-dashed border-slate-600 hover:border-emerald-500 text-slate-400 hover:text-emerald-400 rounded-xl transition-colors flex items-center justify-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Add Workout
+            </button>
+          )}
         </div>
       )}
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div className="bg-slate-700/30 rounded-xl p-4 text-center">
           <div className="text-3xl font-bold text-emerald-400">{workoutDays}</div>
-          <div className="text-sm text-slate-400">Workout Days</div>
+          <div className="text-sm text-slate-400">Active Days</div>
         </div>
         <div className="bg-slate-700/30 rounded-xl p-4 text-center">
-          <div className="text-3xl font-bold text-cyan-400">{totalHours}</div>
+          <div className="text-3xl font-bold text-cyan-400">{totalWorkouts}</div>
+          <div className="text-sm text-slate-400">Total Workouts</div>
+        </div>
+        <div className="bg-slate-700/30 rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold text-amber-400">{totalHours}</div>
           <div className="text-sm text-slate-400">Total Hours</div>
         </div>
       </div>
 
-      {/* Workout Type Legend */}
-      <div className="flex flex-wrap gap-2 justify-center">
-        {WORKOUT_TYPES.filter(w => w.type !== 'rest').slice(0, 8).map(({ type, label, icon: Icon, color }) => (
-          <div key={type} className="flex items-center gap-1 text-xs text-slate-400">
-            <Icon className={`w-3 h-3 ${color}`} />
-            <span>{label}</span>
-          </div>
-        ))}
-      </div>
+      {/* Instructions */}
+      <p className="text-center text-slate-500 text-sm">
+        Click on a day to add workouts. You can add multiple workouts per day!
+      </p>
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4">
