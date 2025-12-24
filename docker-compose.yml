@@ -34,12 +34,13 @@ services:
       DB_PASSWORD: postgres
       DB_DATABASE: macro_calculator
       FRONTEND_URL: http://localhost:3000
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
 
-  # React Frontend
+  # React Frontend (User-facing)
   frontend:
     build:
       context: ./ui
@@ -49,6 +50,18 @@ services:
       - "8080:3000"
     environment:
       VITE_API_URL: http://localhost:3001
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # React Admin Panel
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: macro-calculator-admin
+    ports:
+      - "8081:3000"
     depends_on:
       - backend
     restart: unless-stopped

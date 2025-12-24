@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MacroCalculatorModule } from './modules/macro-calculator/macro-calculator.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -25,13 +26,14 @@ import { MacroCalculatorModule } from './modules/macro-calculator/macro-calculat
         password: configService.get('DB_PASSWORD', 'postgres'),
         database: configService.get('DB_DATABASE', 'macro_calculator'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') === 'development', // Auto-sync in dev only
+        synchronize: true, // Auto-sync schema (for development/testing - use migrations in production)
         logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
 
     // Feature modules
     MacroCalculatorModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

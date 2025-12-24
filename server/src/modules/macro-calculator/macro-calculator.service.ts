@@ -11,10 +11,15 @@ import {
   Goal,
   Gender,
   WorkoutType,
+  Configuration,
 } from '../../entities';
 
 @Injectable()
 export class MacroCalculatorService {
+  private configCache: Record<string, number> = {};
+  private configCacheTime = 0;
+  private readonly CACHE_TTL = 60000; // 1 minute cache
+
   constructor(
     @InjectRepository(UserInput)
     private userInputRepository: Repository<UserInput>,
@@ -22,13 +27,41 @@ export class MacroCalculatorService {
     private workoutRepository: Repository<Workout>,
     @InjectRepository(MacroResult)
     private macroResultRepository: Repository<MacroResult>,
+    @InjectRepository(Configuration)
+    private configRepository: Repository<Configuration>,
   ) {}
+
+  /**
+   * Load configuration values from database with caching
+   */
+  private async loadConfig(): Promise<Record<string, number>> {
+    const now = Date.now();
+    if (now - this.configCacheTime < this.CACHE_TTL && Object.keys(this.configCache).length > 0) {
+      return this.configCache;
+    }
+
+    const configs = await this.configRepository.find();
+    this.configCache = configs.reduce((acc, c) => {
+      acc[c.key] = Number(c.value);
+      return acc;
+    }, {} as Record<string, number>);
+    this.configCacheTime = now;
+    return this.configCache;
+  }
+
+  /**
+   * Get a config value with fallback
+   */
+  private getConfigValue(config: Record<string, number>, key: string, fallback: number): number {
+    return config[key] ?? fallback;
+  }
 
   /**
    * Main method to calculate macros based on user input and workout schedule
    */
   async calculateMacros(dto: CalculateMacrosDto): Promise<MacroResult> {
     const { userInput, workouts } = dto;
+    const config = await this.loadConfig();
 
     // Convert units to metric for calculations
     const weightKg = this.convertToKg(userInput.weight, userInput.weightUnit);
@@ -38,20 +71,20 @@ export class MacroCalculatorService {
     const bmr = this.calculateBMR(weightKg, heightCm, userInput.age, userInput.gender);
 
     // Calculate average activity level from workout schedule
-    const activityMultiplier = this.calculateActivityMultiplier(workouts);
+    const activityMultiplier = await this.calculateActivityMultiplier(workouts, config);
 
     // Calculate TDEE
     const tdee = Math.round(bmr * activityMultiplier);
 
     // Calculate daily calories based on goal
-    const dailyCalories = this.calculateCaloriesForGoal(tdee, userInput.goal);
+    const dailyCalories = this.calculateCaloriesForGoal(tdee, userInput.goal, config);
 
     // Calculate macro distribution
-    const macros = this.calculateMacroDistribution(dailyCalories, weightKg, userInput.goal);
+    const macros = this.calculateMacroDistribution(dailyCalories, weightKg, userInput.goal, config);
 
     // Calculate special day macros (workout vs rest days)
-    const workoutDayMacros = this.calculateWorkoutDayMacros(dailyCalories, weightKg, userInput.goal);
-    const restDayMacros = this.calculateRestDayMacros(dailyCalories, weightKg, userInput.goal);
+    const workoutDayMacros = this.calculateWorkoutDayMacros(dailyCalories, weightKg, config);
+    const restDayMacros = this.calculateRestDayMacros(dailyCalories, weightKg, config);
 
     // Save to database
     const savedUserInput = await this.saveUserInput(userInput);
@@ -116,72 +149,87 @@ export class MacroCalculatorService {
   }
 
   /**
-   * Get intensity multiplier for each workout type
-   * Scale: 0.5 (very low) to 2.0 (extreme)
-   * Based on MET (Metabolic Equivalent of Task) values
+   * Get intensity multiplier for each workout type from config
    */
-  private getWorkoutIntensity(type: WorkoutType): number {
-    const intensityMap: Record<WorkoutType, number> = {
+  private getWorkoutIntensity(type: WorkoutType, config: Record<string, number>): number {
+    const intensityKey = `intensity_${type}`;
+    
+    // Fallback values if not in config
+    const fallbackMap: Record<WorkoutType, number> = {
       [WorkoutType.REST]: 0,
-      [WorkoutType.WALKING]: 0.5,        // ~3.5 METs - Light activity
-      [WorkoutType.YOGA]: 0.6,           // ~3-4 METs - Light to moderate
-      [WorkoutType.PILATES]: 0.7,        // ~4 METs - Moderate
-      [WorkoutType.CYCLING]: 0.9,        // ~6-8 METs - Moderate to vigorous (depends on intensity)
-      [WorkoutType.DANCE]: 0.9,          // ~5-8 METs - Moderate to vigorous
-      [WorkoutType.SWIMMING]: 1.0,       // ~6-10 METs - Moderate to vigorous
-      [WorkoutType.STRENGTH]: 1.0,       // ~5-6 METs - Moderate
-      [WorkoutType.CARDIO]: 1.1,         // ~7-10 METs - Vigorous
-      [WorkoutType.RUNNING]: 1.2,        // ~8-12 METs - Vigorous
-      [WorkoutType.CLIMBING]: 1.2,       // ~8-11 METs - Vigorous
-      [WorkoutType.SPORTS]: 1.2,         // ~6-12 METs - Variable, assume vigorous
-      [WorkoutType.MARTIAL_ARTS]: 1.4,   // ~10-12 METs - Very vigorous
-      [WorkoutType.BOXING]: 1.5,         // ~10-13 METs - Very vigorous
-      [WorkoutType.HIIT]: 1.6,           // ~12-15 METs - Extreme
-      [WorkoutType.CROSSFIT]: 1.7,       // ~12-16 METs - Extreme
-      [WorkoutType.OTHER]: 1.0,          // Default to moderate
+      [WorkoutType.WALKING]: 0.5,
+      [WorkoutType.YOGA]: 0.6,
+      [WorkoutType.PILATES]: 0.7,
+      [WorkoutType.CYCLING]: 0.9,
+      [WorkoutType.DANCE]: 0.9,
+      [WorkoutType.SWIMMING]: 1.0,
+      [WorkoutType.STRENGTH]: 1.0,
+      [WorkoutType.CARDIO]: 1.1,
+      [WorkoutType.RUNNING]: 1.2,
+      [WorkoutType.CLIMBING]: 1.2,
+      [WorkoutType.SPORTS]: 1.2,
+      [WorkoutType.MARTIAL_ARTS]: 1.4,
+      [WorkoutType.BOXING]: 1.5,
+      [WorkoutType.HIIT]: 1.6,
+      [WorkoutType.CROSSFIT]: 1.7,
+      [WorkoutType.OTHER]: 1.0,
     };
-    return intensityMap[type] ?? 1.0;
+
+    return config[intensityKey] ?? fallbackMap[type] ?? 1.0;
   }
 
   /**
    * Calculate activity multiplier based on workout schedule
    * Takes into account both duration and intensity of each workout
    */
-  private calculateActivityMultiplier(workouts: WorkoutDto[]): number {
+  private async calculateActivityMultiplier(
+    workouts: WorkoutDto[],
+    config: Record<string, number>,
+  ): Promise<number> {
     const workoutDays = workouts.filter(w => w.type !== WorkoutType.REST);
     
     // Calculate intensity-weighted hours
-    // Formula: hours × intensity multiplier
     const weightedHours = workoutDays.reduce((sum, w) => {
-      const intensity = this.getWorkoutIntensity(w.type);
+      const intensity = this.getWorkoutIntensity(w.type, config);
       return sum + (w.hours * intensity);
     }, 0);
     
     // Average weighted hours per day
     const avgWeightedHours = weightedHours / 7;
 
+    // Get activity level multipliers from config
+    const sedentary = this.getConfigValue(config, 'activity_sedentary', 1.2);
+    const light = this.getConfigValue(config, 'activity_light', 1.375);
+    const moderate = this.getConfigValue(config, 'activity_moderate', 1.55);
+    const veryActive = this.getConfigValue(config, 'activity_very_active', 1.725);
+    const extraActive = this.getConfigValue(config, 'activity_extra_active', 1.9);
+    const athlete = this.getConfigValue(config, 'activity_athlete', 2.0);
+
     // Activity multipliers based on intensity-weighted average daily exercise
-    // These thresholds are adjusted for the weighted calculation
-    if (avgWeightedHours < 0.3) return 1.2;    // Sedentary (little to no exercise)
-    if (avgWeightedHours < 0.6) return 1.375;  // Lightly active (light exercise 1-3 days/week)
-    if (avgWeightedHours < 1.0) return 1.55;   // Moderately active (moderate exercise 3-5 days/week)
-    if (avgWeightedHours < 1.5) return 1.725;  // Very active (hard exercise 6-7 days/week)
-    if (avgWeightedHours < 2.0) return 1.9;    // Extra active (very hard exercise, physical job)
-    return 2.0;                                 // Athlete level (intense training twice daily)
+    if (avgWeightedHours < 0.3) return sedentary;
+    if (avgWeightedHours < 0.6) return light;
+    if (avgWeightedHours < 1.0) return moderate;
+    if (avgWeightedHours < 1.5) return veryActive;
+    if (avgWeightedHours < 2.0) return extraActive;
+    return athlete;
   }
 
   /**
    * Calculate daily calories based on goal
    */
-  private calculateCaloriesForGoal(tdee: number, goal: Goal): number {
+  private calculateCaloriesForGoal(
+    tdee: number,
+    goal: Goal,
+    config: Record<string, number>,
+  ): number {
     switch (goal) {
       case Goal.WEIGHT_LOSS:
-        return Math.round(tdee * 0.8); // 20% deficit
+        return Math.round(tdee * this.getConfigValue(config, 'goal_weight_loss', 0.8));
       case Goal.MUSCLE_GAIN:
-        return Math.round(tdee * 1.1); // 10% surplus
+        return Math.round(tdee * this.getConfigValue(config, 'goal_muscle_gain', 1.1));
       case Goal.MAINTENANCE:
       default:
-        return tdee;
+        return Math.round(tdee * this.getConfigValue(config, 'goal_maintenance', 1.0));
     }
   }
 
@@ -192,25 +240,24 @@ export class MacroCalculatorService {
     calories: number,
     weightKg: number,
     goal: Goal,
+    config: Record<string, number>,
   ): { protein: number; carbs: number; fats: number } {
     let proteinRatio: number;
     let fatRatio: number;
 
     switch (goal) {
       case Goal.WEIGHT_LOSS:
-        // Higher protein to preserve muscle during deficit
-        proteinRatio = 0.35;
-        fatRatio = 0.3;
+        proteinRatio = this.getConfigValue(config, 'macro_protein_weight_loss', 0.35);
+        fatRatio = this.getConfigValue(config, 'macro_fat_weight_loss', 0.30);
         break;
       case Goal.MUSCLE_GAIN:
-        // High protein for muscle building
-        proteinRatio = 0.3;
-        fatRatio = 0.25;
+        proteinRatio = this.getConfigValue(config, 'macro_protein_muscle_gain', 0.30);
+        fatRatio = this.getConfigValue(config, 'macro_fat_muscle_gain', 0.25);
         break;
       case Goal.MAINTENANCE:
       default:
-        proteinRatio = 0.25;
-        fatRatio = 0.3;
+        proteinRatio = this.getConfigValue(config, 'macro_protein_maintenance', 0.25);
+        fatRatio = this.getConfigValue(config, 'macro_fat_maintenance', 0.30);
     }
 
     const carbRatio = 1 - proteinRatio - fatRatio;
@@ -220,8 +267,9 @@ export class MacroCalculatorService {
     const carbs = Math.round((calories * carbRatio) / 4);
     const fats = Math.round((calories * fatRatio) / 9);
 
-    // Ensure minimum protein based on body weight (1.6g per kg for active individuals)
-    const minProtein = Math.round(weightKg * 1.6);
+    // Ensure minimum protein based on body weight
+    const minProteinPerKg = this.getConfigValue(config, 'macro_min_protein_per_kg', 1.6);
+    const minProtein = Math.round(weightKg * minProteinPerKg);
     const finalProtein = Math.max(protein, minProtein);
 
     return { protein: finalProtein, carbs, fats };
@@ -233,14 +281,15 @@ export class MacroCalculatorService {
   private calculateWorkoutDayMacros(
     baseCalories: number,
     weightKg: number,
-    goal: Goal,
+    config: Record<string, number>,
   ): { calories: number; protein: number; carbs: number; fats: number } {
-    // Add 10% more calories on workout days
-    const calories = Math.round(baseCalories * 1.1);
-    
-    // Higher carb ratio on workout days
-    const protein = Math.round(weightKg * 2); // 2g per kg
-    const fats = Math.round((calories * 0.25) / 9);
+    const multiplier = this.getConfigValue(config, 'workout_day_multiplier', 1.1);
+    const proteinPerKg = this.getConfigValue(config, 'workout_day_protein_per_kg', 2.0);
+    const fatRatio = this.getConfigValue(config, 'workout_day_fat_ratio', 0.25);
+
+    const calories = Math.round(baseCalories * multiplier);
+    const protein = Math.round(weightKg * proteinPerKg);
+    const fats = Math.round((calories * fatRatio) / 9);
     const carbCalories = calories - (protein * 4) - (fats * 9);
     const carbs = Math.round(carbCalories / 4);
 
@@ -253,14 +302,15 @@ export class MacroCalculatorService {
   private calculateRestDayMacros(
     baseCalories: number,
     weightKg: number,
-    goal: Goal,
+    config: Record<string, number>,
   ): { calories: number; protein: number; carbs: number; fats: number } {
-    // Slightly fewer calories on rest days
-    const calories = Math.round(baseCalories * 0.9);
-    
-    // Lower carb ratio on rest days, higher fat
-    const protein = Math.round(weightKg * 1.8); // 1.8g per kg
-    const fats = Math.round((calories * 0.35) / 9);
+    const multiplier = this.getConfigValue(config, 'rest_day_multiplier', 0.9);
+    const proteinPerKg = this.getConfigValue(config, 'rest_day_protein_per_kg', 1.8);
+    const fatRatio = this.getConfigValue(config, 'rest_day_fat_ratio', 0.35);
+
+    const calories = Math.round(baseCalories * multiplier);
+    const protein = Math.round(weightKg * proteinPerKg);
+    const fats = Math.round((calories * fatRatio) / 9);
     const carbCalories = calories - (protein * 4) - (fats * 9);
     const carbs = Math.round(carbCalories / 4);
 
@@ -316,4 +366,3 @@ export class MacroCalculatorService {
     return this.workoutRepository.save(workoutEntities);
   }
 }
-
