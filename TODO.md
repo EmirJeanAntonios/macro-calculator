@@ -9,11 +9,11 @@
 - [x] Set up environment configuration (.env)
 - [x] Configure CORS for frontend communication
 
-### Task 1.2: Database Setup (PostgreSQL)
-- [ ] Create database schema design
-- [ ] Set up TypeORM configuration
-- [ ] Create database entities (User, Workout, MacroResult, etc.)
-- [ ] Set up migrations
+### Task 1.2: Database Setup (PostgreSQL) ✅
+- [x] Create database schema design
+- [x] Set up TypeORM configuration
+- [x] Create database entities (User, Workout, MacroResult, etc.)
+- [x] Set up migrations (using synchronize for dev)
 
 ### Task 1.3: Frontend Setup (ReactJS)
 - [ ] Initialize React project in `/ui` directory
