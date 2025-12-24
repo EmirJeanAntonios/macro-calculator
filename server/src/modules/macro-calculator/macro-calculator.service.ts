@@ -116,19 +116,58 @@ export class MacroCalculatorService {
   }
 
   /**
+   * Get intensity multiplier for each workout type
+   * Scale: 0.5 (very low) to 2.0 (extreme)
+   * Based on MET (Metabolic Equivalent of Task) values
+   */
+  private getWorkoutIntensity(type: WorkoutType): number {
+    const intensityMap: Record<WorkoutType, number> = {
+      [WorkoutType.REST]: 0,
+      [WorkoutType.WALKING]: 0.5,        // ~3.5 METs - Light activity
+      [WorkoutType.YOGA]: 0.6,           // ~3-4 METs - Light to moderate
+      [WorkoutType.PILATES]: 0.7,        // ~4 METs - Moderate
+      [WorkoutType.CYCLING]: 0.9,        // ~6-8 METs - Moderate to vigorous (depends on intensity)
+      [WorkoutType.DANCE]: 0.9,          // ~5-8 METs - Moderate to vigorous
+      [WorkoutType.SWIMMING]: 1.0,       // ~6-10 METs - Moderate to vigorous
+      [WorkoutType.STRENGTH]: 1.0,       // ~5-6 METs - Moderate
+      [WorkoutType.CARDIO]: 1.1,         // ~7-10 METs - Vigorous
+      [WorkoutType.RUNNING]: 1.2,        // ~8-12 METs - Vigorous
+      [WorkoutType.CLIMBING]: 1.2,       // ~8-11 METs - Vigorous
+      [WorkoutType.SPORTS]: 1.2,         // ~6-12 METs - Variable, assume vigorous
+      [WorkoutType.MARTIAL_ARTS]: 1.4,   // ~10-12 METs - Very vigorous
+      [WorkoutType.BOXING]: 1.5,         // ~10-13 METs - Very vigorous
+      [WorkoutType.HIIT]: 1.6,           // ~12-15 METs - Extreme
+      [WorkoutType.CROSSFIT]: 1.7,       // ~12-16 METs - Extreme
+      [WorkoutType.OTHER]: 1.0,          // Default to moderate
+    };
+    return intensityMap[type] ?? 1.0;
+  }
+
+  /**
    * Calculate activity multiplier based on workout schedule
+   * Takes into account both duration and intensity of each workout
    */
   private calculateActivityMultiplier(workouts: WorkoutDto[]): number {
     const workoutDays = workouts.filter(w => w.type !== WorkoutType.REST);
-    const totalWorkoutHours = workoutDays.reduce((sum, w) => sum + w.hours, 0);
-    const avgDailyHours = totalWorkoutHours / 7;
+    
+    // Calculate intensity-weighted hours
+    // Formula: hours × intensity multiplier
+    const weightedHours = workoutDays.reduce((sum, w) => {
+      const intensity = this.getWorkoutIntensity(w.type);
+      return sum + (w.hours * intensity);
+    }, 0);
+    
+    // Average weighted hours per day
+    const avgWeightedHours = weightedHours / 7;
 
-    // Activity multipliers based on average daily exercise
-    if (avgDailyHours < 0.5) return 1.2; // Sedentary
-    if (avgDailyHours < 1) return 1.375; // Lightly active
-    if (avgDailyHours < 1.5) return 1.55; // Moderately active
-    if (avgDailyHours < 2) return 1.725; // Very active
-    return 1.9; // Extra active
+    // Activity multipliers based on intensity-weighted average daily exercise
+    // These thresholds are adjusted for the weighted calculation
+    if (avgWeightedHours < 0.3) return 1.2;    // Sedentary (little to no exercise)
+    if (avgWeightedHours < 0.6) return 1.375;  // Lightly active (light exercise 1-3 days/week)
+    if (avgWeightedHours < 1.0) return 1.55;   // Moderately active (moderate exercise 3-5 days/week)
+    if (avgWeightedHours < 1.5) return 1.725;  // Very active (hard exercise 6-7 days/week)
+    if (avgWeightedHours < 2.0) return 1.9;    // Extra active (very hard exercise, physical job)
+    return 2.0;                                 // Athlete level (intense training twice daily)
   }
 
   /**
