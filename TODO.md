@@ -15,11 +15,11 @@
 - [x] Create database entities (User, Workout, MacroResult, etc.)
 - [x] Set up migrations (using synchronize for dev)
 
-### Task 1.3: Frontend Setup (ReactJS)
-- [ ] Initialize React project in `/ui` directory
-- [ ] Install required dependencies (axios, react-router, UI library, etc.)
-- [ ] Set up project structure (components, pages, services, hooks)
-- [ ] Configure environment variables for API connection
+### Task 1.3: Frontend Setup (ReactJS) ✅
+- [x] Initialize React project in `/ui` directory (Vite + TypeScript)
+- [x] Install required dependencies (axios, react-router-dom, Tailwind CSS, lucide-react)
+- [x] Set up project structure (components, pages, services, hooks, types, utils)
+- [x] Configure API proxy for backend connection
 
 ---
 
@@ -118,7 +118,7 @@
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| Phase 1: Project Setup | ⏳ Pending | |
+| Phase 1: Project Setup | ✅ Completed | All setup tasks done |
 | Phase 2: Backend Development | ⏳ Pending | |
 | Phase 3: Frontend Development | ⏳ Pending | |
 | Phase 4: Integration & Testing | ⏳ Pending | |
