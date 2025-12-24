@@ -1,0 +1,22 @@
+{
+  "name": "Macro Calculator",
+  "short_name": "Macros",
+  "description": "Calculate your daily macros based on your goals, body metrics, and workout schedule.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle"],
+  "lang": "en-US",
+  "dir": "ltr"
+}
+

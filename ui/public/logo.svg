@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:0.3"/>
+    </linearGradient>
+    <linearGradient id="appleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f43f5e"/>
+      <stop offset="100%" style="stop-color:#e11d48"/>
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#34d399"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#0f172a"/>
+  
+  <!-- Outer ring -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#ring)" stroke-width="24"/>
+  
+  <!-- Macro segments (donut chart style) -->
+  <!-- Protein segment (rose) -->
+  <path d="M 256 56 A 200 200 0 0 1 429 156" fill="none" stroke="#f43f5e" stroke-width="24" stroke-linecap="round"/>
+  
+  <!-- Carbs segment (amber) -->
+  <path d="M 429 156 A 200 200 0 0 1 429 356" fill="none" stroke="#f59e0b" stroke-width="24" stroke-linecap="round"/>
+  
+  <!-- Fats segment (cyan) -->
+  <path d="M 429 356 A 200 200 0 0 1 256 456" fill="none" stroke="#06b6d4" stroke-width="24" stroke-linecap="round"/>
+  
+  <!-- Center icon - Apple -->
+  <g transform="translate(256, 270)">
+    <!-- Apple body -->
+    <path d="M 0 -60 
+             C -25 -60, -65 -30, -65 30 
+             C -65 70, -40 95, 0 95 
+             C 40 95, 65 70, 65 30 
+             C 65 -30, 25 -60, 0 -60 Z" 
+          fill="url(#appleGrad)"/>
+    
+    <!-- Apple indent at top -->
+    <ellipse cx="0" cy="-55" rx="15" ry="10" fill="#0f172a"/>
+    
+    <!-- Apple highlight -->
+    <ellipse cx="-30" cy="0" rx="12" ry="25" fill="#fb7185" opacity="0.4"/>
+    
+    <!-- Stem -->
+    <path d="M 0 -65 Q 5 -85, 0 -95" 
+          stroke="#854d0e" stroke-width="8" fill="none" stroke-linecap="round"/>
+    
+    <!-- Leaf -->
+    <path d="M 5 -85 
+             Q 35 -100, 50 -75 
+             Q 35 -70, 5 -85 Z" 
+          fill="url(#leafGrad)"/>
+    
+    <!-- Leaf vein -->
+    <path d="M 12 -82 Q 30 -85, 42 -78" 
+          stroke="#059669" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

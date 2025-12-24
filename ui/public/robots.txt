@@ -1,0 +1,10 @@
+# robots.txt for Macro Calculator
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://macroapp.emirjeanantonios.com/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
+
