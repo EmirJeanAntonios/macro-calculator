@@ -1,23 +1,12 @@
-// User input types
 export type Gender = 'male' | 'female';
-export type Goal = 'weight_loss' | 'maintenance' | 'muscle_gain';
 export type WeightUnit = 'kg' | 'lbs';
 export type HeightUnit = 'cm' | 'ft';
+export type Goal = 'weight_loss' | 'maintenance' | 'muscle_gain';
 export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
-// WorkoutType is now a dynamic string (not an enum) to support custom types
-export type WorkoutType = string;
-
-// Dynamic workout type from API
-export interface WorkoutTypeOption {
-  key: string;
-  name: string;
-  intensity: number;
-  icon: string | null;
-  color: string | null;
-  description: string | null;
-}
+export type WorkoutType = 'rest' | 'cardio' | 'strength' | 'hiit' | 'yoga' | 'sports' | 'running' | 'cycling' | 'swimming' | 'crossfit' | 'pilates' | 'boxing' | 'martial_arts' | 'dance' | 'climbing' | 'walking' | 'other';
 
 export interface UserInput {
+  id?: string;
   age: number;
   gender: Gender;
   weight: number;
@@ -28,8 +17,9 @@ export interface UserInput {
 }
 
 export interface Workout {
+  id?: string;
   day: DayOfWeek;
-  type: string; // Dynamic workout type key
+  type: WorkoutType;
   hours: number;
   notes?: string;
 }
@@ -51,17 +41,7 @@ export interface MacroResult {
   restDayCarbs?: number;
   restDayFats?: number;
   calculatedAt: string;
-  userInput?: UserInputWithWorkouts;
-}
-
-export interface UserInputWithWorkouts extends UserInput {
-  id: string;
-  workouts: Workout[];
-}
-
-export interface CalculateRequest {
-  userInput: UserInput;
-  workouts: Workout[];
+  userInput?: UserInput;
 }
 
 export interface ApiResponse<T> {

@@ -5,6 +5,14 @@
     "newCalculation": "Nuevo Cálculo",
     "history": "Historial"
   },
+  "common": {
+    "back": "Atrás",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "loading": "Cargando..."
+  },
   "home": {
     "tellUs": "Cuéntanos Sobre Ti",
     "enterDetails": "Ingresa tus datos para obtener recomendaciones personalizadas de macros",
@@ -38,12 +46,19 @@
   },
   "calendar": {
     "title": "Calendario de Entrenamiento Semanal",
+    "subtitle": "Haz clic en un día para configurar tu tipo y duración de entrenamiento",
     "description": "Haz clic en un día para configurar tu tipo y duración de entrenamiento",
     "back": "Atrás",
     "calculateMacros": "Calcular Mis Macros",
-    "addWorkout": "Agregar otro entrenamiento",
+    "calculate": "Calcular Mis Macros",
+    "addWorkout": "Agregar Entrenamiento",
     "duration": "Duración",
     "hours": "horas",
+    "rest": "Descanso",
+    "noWorkouts": "Sin entrenamientos programados - será un día de descanso",
+    "workoutType": "Tipo de Entrenamiento",
+    "workoutDays": "Días de Entrenamiento",
+    "restDays": "Días de Descanso",
     "days": {
       "monday": "Lunes",
       "tuesday": "Martes",

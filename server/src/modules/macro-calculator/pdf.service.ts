@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
-import { MacroResult, UserInput, Workout, Goal, WorkoutType } from '../../entities';
+import { MacroResult, UserInput, Workout, Goal } from '../../entities';
 
 @Injectable()
 export class PdfService {
@@ -140,7 +140,7 @@ export class PdfService {
         doc
           .fillColor(textColor)
           .text(`${this.capitalize(dayName)}: `, { continued: true })
-          .fillColor(workout.type === WorkoutType.REST ? mutedColor : primaryColor)
+          .fillColor(workout.type === 'rest' ? mutedColor : primaryColor)
           .text(`${typeLabel}${hours}`);
       }
     }
@@ -217,45 +217,17 @@ export class PdfService {
     }
   }
 
-  private formatWorkoutType(type: WorkoutType): string {
-    switch (type) {
-      case WorkoutType.REST:
-        return 'Rest Day';
-      case WorkoutType.CARDIO:
-        return 'Cardio';
-      case WorkoutType.STRENGTH:
-        return 'Strength Training';
-      case WorkoutType.HIIT:
-        return 'HIIT';
-      case WorkoutType.YOGA:
-        return 'Yoga';
-      case WorkoutType.SPORTS:
-        return 'Sports';
-      case WorkoutType.RUNNING:
-        return 'Running';
-      case WorkoutType.CYCLING:
-        return 'Cycling';
-      case WorkoutType.SWIMMING:
-        return 'Swimming';
-      case WorkoutType.PILATES:
-        return 'Pilates';
-      case WorkoutType.CROSSFIT:
-        return 'CrossFit';
-      case WorkoutType.BOXING:
-        return 'Boxing';
-      case WorkoutType.DANCE:
-        return 'Dance';
-      case WorkoutType.WALKING:
-        return 'Walking';
-      case WorkoutType.CLIMBING:
-        return 'Climbing';
-      case WorkoutType.MARTIAL_ARTS:
-        return 'Martial Arts';
-      case WorkoutType.OTHER:
-        return 'Other';
-      default:
-        return type;
-    }
+  private formatWorkoutType(type: string): string {
+    // Special cases
+    if (type === 'rest') return 'Rest Day';
+    if (type === 'hiit') return 'HIIT';
+    if (type === 'crossfit') return 'CrossFit';
+    
+    // Convert underscore_case to Title Case
+    return type
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 }
 

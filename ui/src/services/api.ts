@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { CalculateRequest, MacroResult, ApiResponse } from '../types';
+import type { CalculateRequest, MacroResult, ApiResponse, WorkoutTypeOption } from '../types';
 
 // Backend response wrapper type
 interface BackendResponse<T> {
@@ -71,6 +71,19 @@ export const macroService = {
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
+  },
+
+  // Get available workout types
+  getWorkoutTypes: async (): Promise<ApiResponse<WorkoutTypeOption[]>> => {
+    try {
+      const response = await api.get<BackendResponse<WorkoutTypeOption[]>>('/workout-types');
+      return { success: true, data: response.data.data };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return { success: false, error: error.response?.data?.message || 'Failed to fetch workout types' };
+      }
+      return { success: false, error: 'An unexpected error occurred' };
+    }
   },
 };
 
