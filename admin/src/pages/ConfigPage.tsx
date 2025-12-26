@@ -4,7 +4,6 @@ import {
   Loader2,
   RotateCcw,
   Settings,
-  Dumbbell,
   Activity,
   Target,
   Percent,
@@ -18,12 +17,6 @@ const CATEGORY_INFO: Record<
   string,
   { label: string; icon: React.ElementType; color: string; description: string }
 > = {
-  workout_intensity: {
-    label: 'Workout Intensity',
-    icon: Dumbbell,
-    color: 'violet',
-    description: 'Intensity multipliers for different workout types (affects TDEE calculation)',
-  },
   activity_level: {
     label: 'Activity Levels',
     icon: Activity,
@@ -49,6 +42,9 @@ const CATEGORY_INFO: Record<
     description: 'Adjustments for workout days vs rest days',
   },
 };
+
+// Categories to exclude from config page (managed elsewhere)
+const EXCLUDED_CATEGORIES = ['workout_intensity'];
 
 export default function ConfigPage() {
   const [configs, setConfigs] = useState<ConfigMap>({});
@@ -196,7 +192,9 @@ export default function ConfigPage() {
 
       {/* Config Categories */}
       <div className="space-y-8">
-        {Object.entries(configs).map(([category, items]) => {
+        {Object.entries(configs)
+          .filter(([category]) => !EXCLUDED_CATEGORIES.includes(category))
+          .map(([category, items]) => {
           const info = CATEGORY_INFO[category] || {
             label: category,
             icon: Settings,
@@ -225,15 +223,22 @@ export default function ConfigPage() {
               </div>
 
               {/* Config Items */}
-              <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {items.map((item) => (
-                  <ConfigInput
-                    key={item.key}
-                    item={item}
-                    onChange={(value) => handleValueChange(category, item.key, value)}
-                  />
-                ))}
-              </div>
+              {category === 'macro_ratio' ? (
+                <MacroRatioSection
+                  items={items}
+                  onChange={(key, value) => handleValueChange(category, key, value)}
+                />
+              ) : (
+                <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {items.map((item) => (
+                    <ConfigInput
+                      key={item.key}
+                      item={item}
+                      onChange={(value) => handleValueChange(category, item.key, value)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
@@ -242,12 +247,118 @@ export default function ConfigPage() {
   );
 }
 
+// Group macro ratio items by goal type
+interface MacroRatioSectionProps {
+  items: ConfigItem[];
+  onChange: (key: string, value: string) => void;
+}
+
+function MacroRatioSection({ items, onChange }: MacroRatioSectionProps) {
+  // Define goal groups
+  const goalGroups = [
+    {
+      key: 'weight_loss',
+      label: 'Weight Loss',
+      color: 'rose',
+      emoji: '🔥',
+    },
+    {
+      key: 'muscle_gain',
+      label: 'Muscle Gain',
+      color: 'emerald',
+      emoji: '💪',
+    },
+    {
+      key: 'maintenance',
+      label: 'Maintenance',
+      color: 'cyan',
+      emoji: '⚖️',
+    },
+  ];
+
+  // Group items by goal
+  const groupedItems: Record<string, ConfigItem[]> = {};
+  const otherItems: ConfigItem[] = [];
+
+  items.forEach((item) => {
+    const goal = goalGroups.find((g) => item.key.includes(g.key));
+    if (goal) {
+      if (!groupedItems[goal.key]) {
+        groupedItems[goal.key] = [];
+      }
+      groupedItems[goal.key].push(item);
+    } else {
+      otherItems.push(item);
+    }
+  });
+
+  const getGroupColor = (color: string) => {
+    const colors: Record<string, { border: string; bg: string; text: string }> = {
+      rose: { border: 'border-rose-500/30', bg: 'bg-rose-500/10', text: 'text-rose-400' },
+      emerald: { border: 'border-emerald-500/30', bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
+      cyan: { border: 'border-cyan-500/30', bg: 'bg-cyan-500/10', text: 'text-cyan-400' },
+    };
+    return colors[color] || colors.cyan;
+  };
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Grouped by goal */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {goalGroups.map((goal) => {
+          const goalItems = groupedItems[goal.key] || [];
+          const colors = getGroupColor(goal.color);
+          
+          return (
+            <div
+              key={goal.key}
+              className={`rounded-xl border ${colors.border} ${colors.bg} p-4`}
+            >
+              <h3 className={`font-medium ${colors.text} mb-4 flex items-center gap-2`}>
+                <span>{goal.emoji}</span>
+                {goal.label}
+              </h3>
+              <div className="space-y-3">
+                {goalItems.map((item) => (
+                  <ConfigInput
+                    key={item.key}
+                    item={item}
+                    onChange={(value) => onChange(item.key, value)}
+                    compact
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Other items (like min_protein_per_kg) */}
+      {otherItems.length > 0 && (
+        <div className="pt-4 border-t border-slate-700/50">
+          <h3 className="text-sm text-slate-400 mb-4">General Settings</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {otherItems.map((item) => (
+              <ConfigInput
+                key={item.key}
+                item={item}
+                onChange={(value) => onChange(item.key, value)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface ConfigInputProps {
   item: ConfigItem;
   onChange: (value: string) => void;
+  compact?: boolean;
 }
 
-function ConfigInput({ item, onChange }: ConfigInputProps) {
+function ConfigInput({ item, onChange, compact = false }: ConfigInputProps) {
   const numericValue = typeof item.value === 'string' ? parseFloat(item.value) : item.value;
   const isRatio = item.key.includes('ratio') && !item.key.includes('multiplier');
   const displayValue = isRatio 
@@ -261,6 +372,32 @@ function ConfigInput({ item, onChange }: ConfigInputProps) {
       onChange(rawValue);
     }
   };
+
+  // Simplify label for compact mode (remove goal suffix)
+  const getCompactLabel = (label: string) => {
+    return label
+      .replace(/\s*\(Weight Loss\)/, '')
+      .replace(/\s*\(Muscle Gain\)/, '')
+      .replace(/\s*\(Maintenance\)/, '');
+  };
+
+  if (compact) {
+    return (
+      <div className="flex items-center justify-between gap-3">
+        <label className="text-sm text-slate-300 flex-1">{getCompactLabel(item.label)}</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            value={displayValue}
+            onChange={(e) => handleChange(e.target.value)}
+            step={isRatio ? '1' : '0.01'}
+            className="w-20 px-2 py-1.5 bg-slate-800/80 border border-slate-600 rounded-lg text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
+          />
+          {isRatio && <span className="text-xs text-slate-500 w-4">%</span>}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-slate-900/50 rounded-xl p-4">
