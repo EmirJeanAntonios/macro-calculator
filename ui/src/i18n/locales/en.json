@@ -5,6 +5,14 @@
     "newCalculation": "New Calculation",
     "history": "History"
   },
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading..."
+  },
   "home": {
     "tellUs": "Tell Us About Yourself",
     "enterDetails": "Enter your details to get personalized macro recommendations",
@@ -38,12 +46,19 @@
   },
   "calendar": {
     "title": "Weekly Workout Calendar",
+    "subtitle": "Click on a day to set your workout type and duration",
     "description": "Click on a day to set your workout type and duration",
     "back": "Back",
     "calculateMacros": "Calculate My Macros",
-    "addWorkout": "Add another workout",
+    "calculate": "Calculate My Macros",
+    "addWorkout": "Add Workout",
     "duration": "Duration",
     "hours": "hours",
+    "rest": "Rest",
+    "noWorkouts": "No workouts scheduled - this will be a rest day",
+    "workoutType": "Workout Type",
+    "workoutDays": "Workout Days",
+    "restDays": "Rest Days",
     "days": {
       "monday": "Monday",
       "tuesday": "Tuesday",

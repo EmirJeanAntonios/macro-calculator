@@ -5,6 +5,14 @@
     "newCalculation": "Nouveau Calcul",
     "history": "Historique"
   },
+  "common": {
+    "back": "Retour",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "loading": "Chargement..."
+  },
   "home": {
     "tellUs": "Parlez-nous de Vous",
     "enterDetails": "Entrez vos informations pour obtenir des recommandations personnalisées de macros",
@@ -38,12 +46,19 @@
   },
   "calendar": {
     "title": "Calendrier d'Entraînement Hebdomadaire",
+    "subtitle": "Cliquez sur un jour pour définir votre type et durée d'entraînement",
     "description": "Cliquez sur un jour pour définir votre type et durée d'entraînement",
     "back": "Retour",
     "calculateMacros": "Calculer Mes Macros",
-    "addWorkout": "Ajouter un autre entraînement",
+    "calculate": "Calculer Mes Macros",
+    "addWorkout": "Ajouter Entraînement",
     "duration": "Durée",
     "hours": "heures",
+    "rest": "Repos",
+    "noWorkouts": "Aucun entraînement prévu - ce sera un jour de repos",
+    "workoutType": "Type d'Entraînement",
+    "workoutDays": "Jours d'Entraînement",
+    "restDays": "Jours de Repos",
     "days": {
       "monday": "Lundi",
       "tuesday": "Mardi",

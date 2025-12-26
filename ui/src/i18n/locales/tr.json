@@ -5,6 +5,14 @@
     "newCalculation": "Yeni Hesaplama",
     "history": "Geçmiş"
   },
+  "common": {
+    "back": "Geri",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "loading": "Yükleniyor..."
+  },
   "home": {
     "tellUs": "Kendiniz Hakkında Bilgi Verin",
     "enterDetails": "Kişiselleştirilmiş makro önerileri almak için bilgilerinizi girin",
@@ -38,12 +46,19 @@
   },
   "calendar": {
     "title": "Haftalık Antrenman Takvimi",
+    "subtitle": "Antrenman türü ve süresini ayarlamak için bir güne tıklayın",
     "description": "Antrenman türü ve süresini ayarlamak için bir güne tıklayın",
     "back": "Geri",
     "calculateMacros": "Makrolarımı Hesapla",
-    "addWorkout": "Başka antrenman ekle",
+    "calculate": "Makrolarımı Hesapla",
+    "addWorkout": "Antrenman Ekle",
     "duration": "Süre",
     "hours": "saat",
+    "rest": "Dinlenme",
+    "noWorkouts": "Planlanmış antrenman yok - dinlenme günü olacak",
+    "workoutType": "Antrenman Türü",
+    "workoutDays": "Antrenman Günleri",
+    "restDays": "Dinlenme Günleri",
     "days": {
       "monday": "Pazartesi",
       "tuesday": "Salı",
