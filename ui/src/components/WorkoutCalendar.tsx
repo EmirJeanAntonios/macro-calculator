@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
@@ -23,8 +23,8 @@ import {
   X,
   Loader2,
 } from 'lucide-react';
-import type { Workout, DayOfWeek, WorkoutTypeOption } from '../types';
-import { macroService } from '../services/api';
+import type { Workout, DayOfWeek } from '../types';
+import { useWorkoutTypes } from '../contexts/WorkoutTypesContext';
 
 interface WorkoutCalendarProps {
   onSubmit: (workouts: Workout[]) => void;
@@ -86,9 +86,7 @@ type DaySchedule = DayWorkoutItem[];
 
 export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarProps) {
   const { t } = useTranslation();
-  
-  const [workoutTypes, setWorkoutTypes] = useState<WorkoutTypeOption[]>([]);
-  const [isLoadingTypes, setIsLoadingTypes] = useState(true);
+  const { workoutTypes, isLoading: isLoadingTypes } = useWorkoutTypes();
   
   const [schedule, setSchedule] = useState<Record<DayOfWeek, DaySchedule>>({
     monday: [],
@@ -102,26 +100,15 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
 
   const [selectedDay, setSelectedDay] = useState<DayOfWeek | null>(null);
   const [addingWorkout, setAddingWorkout] = useState(false);
+  
+  // Get default workout type from loaded types
+  const getDefaultWorkoutType = () => {
+    const firstNonRest = workoutTypes.find(t => t.key !== 'rest');
+    return firstNonRest?.key || 'strength';
+  };
+  
   const [newWorkoutType, setNewWorkoutType] = useState<string>('strength');
   const [newWorkoutHours, setNewWorkoutHours] = useState(1);
-
-  // Fetch workout types from API
-  useEffect(() => {
-    const fetchWorkoutTypes = async () => {
-      setIsLoadingTypes(true);
-      const response = await macroService.getWorkoutTypes();
-      if (response.success && response.data) {
-        setWorkoutTypes(response.data);
-        // Set default workout type to first non-rest type
-        const firstNonRest = response.data.find(t => t.key !== 'rest');
-        if (firstNonRest) {
-          setNewWorkoutType(firstNonRest.key);
-        }
-      }
-      setIsLoadingTypes(false);
-    };
-    fetchWorkoutTypes();
-  }, []);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -160,8 +147,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
     }));
     setAddingWorkout(false);
     // Reset to first non-rest type
-    const firstNonRest = workoutTypes.find(t => t.key !== 'rest');
-    setNewWorkoutType(firstNonRest?.key || 'strength');
+    setNewWorkoutType(getDefaultWorkoutType());
     setNewWorkoutHours(1);
   };
 
