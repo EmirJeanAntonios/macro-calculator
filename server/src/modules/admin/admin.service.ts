@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException, OnModuleInit, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -18,6 +19,7 @@ export class AdminService implements OnModuleInit {
     @InjectRepository(WorkoutCategory)
     private workoutCategoryRepository: Repository<WorkoutCategory>,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   /**
@@ -31,16 +33,32 @@ export class AdminService implements OnModuleInit {
 
   /**
    * Create default admin if none exists
+   * Credentials are read from environment variables for security
    */
   private async seedDefaultAdmin() {
     const adminCount = await this.adminRepository.count();
     if (adminCount === 0) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const username = this.configService.get<string>('ADMIN_USERNAME');
+      const password = this.configService.get<string>('ADMIN_PASSWORD');
+
+      if (!username || !password) {
+        console.warn('⚠️  ADMIN_USERNAME and ADMIN_PASSWORD environment variables not set. Skipping admin creation.');
+        return;
+      }
+
+      // Validate password strength
+      if (password.length < 12) {
+        console.warn('⚠️  ADMIN_PASSWORD must be at least 12 characters. Skipping admin creation.');
+        return;
+      }
+
+      // Use bcrypt with cost factor 12 for stronger security
+      const hashedPassword = await bcrypt.hash(password, 12);
       await this.adminRepository.save({
-        username: 'admin',
+        username,
         password: hashedPassword,
       });
-      console.log('Default admin created: username=admin, password=admin123');
+      console.log(`✅ Admin user "${username}" created successfully`);
     }
   }
 
