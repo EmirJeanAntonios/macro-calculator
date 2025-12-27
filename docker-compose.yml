@@ -1,18 +1,18 @@
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database - Internal only, not exposed to internet
   postgres:
     image: postgres:16-alpine
     container_name: macro-calculator-db
     environment:
-      POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      POSTGRES_DB: "${POSTGRES_DB}"
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -27,14 +27,17 @@ services:
       - "3002:3001"
     environment:
       PORT: 3001
-      NODE_ENV: "${NODE_ENV}"
-      DB_HOST: "${DB_HOST}"
-      DB_PORT: "${DB_PORT}"
-      DB_USERNAME: "${DB_USERNAME}"
-      DB_PASSWORD: "${DB_PASSWORD}"
-      DB_DATABASE: "${DB_DATABASE}"
-      FRONTEND_URL: http://localhost:3000
-      JWT_SECRET: "${JWT_SECRET}"
+      NODE_ENV: ${NODE_ENV}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      FRONTEND_URL: ${FRONTEND_URL}
+      JWT_SECRET: ${JWT_SECRET}
+    networks:
+      - internal
+      - web
     depends_on:
       postgres:
         condition: service_healthy
@@ -48,8 +51,8 @@ services:
     container_name: macro-calculator-frontend
     ports:
       - "8080:3000"
-    environment:
-      VITE_API_URL: http://localhost:3001
+    networks:
+      - web
     depends_on:
       - backend
     restart: unless-stopped
@@ -62,9 +65,20 @@ services:
     container_name: macro-calculator-admin
     ports:
       - "8081:3000"
+    networks:
+      - web
     depends_on:
       - backend
     restart: unless-stopped
+
+networks:
+  # Internal network - database communication only (isolated from internet)
+  internal:
+    driver: bridge
+    internal: true
+  # Web network - services that need external access
+  web:
+    driver: bridge
 
 volumes:
   postgres_data:

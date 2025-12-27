@@ -1,0 +1,68 @@
+# Development Docker Compose
+# Usage: docker compose -f docker-compose.dev.yml up
+#
+# This exposes all ports for local development and debugging
+
+services:
+  # PostgreSQL Database - Exposed for local development tools
+  postgres:
+    image: postgres:16-alpine
+    container_name: macro-calculator-db-dev
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword123}
+      POSTGRES_DB: ${POSTGRES_DB:-macro_calculator}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # NestJS Backend - Hot reload enabled
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: macro-calculator-backend-dev
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-devpassword123}
+      DB_DATABASE: ${DB_DATABASE:-macro_calculator}
+      FRONTEND_URL: http://localhost:5173
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-not-for-production}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # pgAdmin - Database management UI (dev only)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: macro-calculator-pgadmin-dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@localhost.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data_dev:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data_dev:
+  pgadmin_data_dev:
+
