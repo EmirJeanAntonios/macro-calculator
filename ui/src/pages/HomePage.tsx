@@ -58,7 +58,7 @@ export default function HomePage() {
       <header className="border-b border-border-subtle">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/" className="text-sm font-semibold text-text-primary tracking-tight">
-            MacroApp
+            Macro Calculator
           </Link>
           <div className="flex items-center gap-1">
             <Link
@@ -140,7 +140,7 @@ export default function HomePage() {
           {/* Footer hint */}
           <p className="mt-4 text-center text-xs text-text-muted flex items-center justify-center gap-1">
             <ChevronRight className="w-3 h-3" />
-            Takes about 2 minutes
+            {t('app.timeEstimate')}
           </p>
         </div>
       </main>
@@ -148,9 +148,9 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-border-subtle py-4 px-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between text-xs text-text-muted">
-          <span>© 2025 MacroApp</span>
+          <span>{t('app.copyright')}</span>
           <Link to="/history" className="hover:text-text-secondary transition-colors">
-            View history
+            {t('app.viewHistory')}
           </Link>
         </div>
       </footer>

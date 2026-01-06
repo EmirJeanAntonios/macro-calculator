@@ -14,13 +14,44 @@ const api = axios.create({
   },
 });
 
+// LocalStorage key for user's calculation history
+const HISTORY_STORAGE_KEY = 'macro_calculator_history';
+
+// Helper to get user's calculation IDs from localStorage
+const getUserHistoryIds = (): string[] => {
+  try {
+    const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+// Helper to add a calculation ID to user's history
+const addToUserHistory = (id: string): void => {
+  try {
+    const ids = getUserHistoryIds();
+    if (!ids.includes(id)) {
+      ids.unshift(id); // Add to beginning (most recent first)
+      // Keep only last 50 calculations
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(ids.slice(0, 50)));
+    }
+  } catch {
+    // Silently fail if localStorage is not available
+  }
+};
+
 export const macroService = {
   // Calculate macros based on user input and workout schedule
   calculate: async (data: CalculateRequest): Promise<ApiResponse<MacroResult>> => {
     try {
       const response = await api.post<BackendResponse<MacroResult>>('/calculate', data);
-      // Backend wraps response in { success, data }
-      return { success: true, data: response.data.data };
+      const result = response.data.data;
+      // Store the result ID in localStorage for user's history
+      if (result?.id) {
+        addToUserHistory(result.id);
+      }
+      return { success: true, data: result };
     } catch (error) {
       if (axios.isAxiosError(error)) {
         return { success: false, error: error.response?.data?.message || 'Failed to calculate macros' };
@@ -43,11 +74,41 @@ export const macroService = {
     }
   },
 
-  // Get all saved macro results
+  // Get all saved macro results (admin/debug use)
   getAllResults: async (): Promise<ApiResponse<MacroResult[]>> => {
     try {
       const response = await api.get<BackendResponse<MacroResult[]>>('/macros');
       return { success: true, data: response.data.data };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return { success: false, error: error.response?.data?.message || 'Failed to fetch results' };
+      }
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  },
+
+  // Get user's own calculation history (stored in localStorage)
+  getUserHistory: async (): Promise<ApiResponse<MacroResult[]>> => {
+    try {
+      const userIds = getUserHistoryIds();
+      if (userIds.length === 0) {
+        return { success: true, data: [] };
+      }
+      
+      // Fetch all results that belong to this user
+      const results: MacroResult[] = [];
+      for (const id of userIds) {
+        try {
+          const response = await api.get<BackendResponse<MacroResult>>(`/macros/${id}`);
+          if (response.data.data) {
+            results.push(response.data.data);
+          }
+        } catch {
+          // Result may have been deleted, skip it
+        }
+      }
+      
+      return { success: true, data: results };
     } catch (error) {
       if (axios.isAxiosError(error)) {
         return { success: false, error: error.response?.data?.message || 'Failed to fetch results' };

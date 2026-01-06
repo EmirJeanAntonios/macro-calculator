@@ -95,7 +95,7 @@ export default function ResultsPage() {
       <header className="border-b border-border-subtle">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/" className="text-sm font-semibold text-text-primary tracking-tight">
-            MacroApp
+            Macro Calculator
           </Link>
           <div className="flex items-center gap-1">
             <Link
@@ -103,7 +103,7 @@ export default function ResultsPage() {
               className="h-8 px-3 flex items-center gap-1.5 rounded-md text-sm text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">New</span>
+              <span className="hidden sm:inline">{t('app.new')}</span>
             </Link>
             <Link
               to="/history"
@@ -126,7 +126,7 @@ export default function ResultsPage() {
               ) : (
                 <Download className="w-3.5 h-3.5" />
               )}
-              PDF
+              {t('app.pdf')}
             </button>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function ResultsPage() {
                   <span className="text-4xl font-bold text-text-primary text-data-lg">
                     {result.dailyCalories}
                   </span>
-                  <span className="text-sm text-text-muted">kcal/day</span>
+                  <span className="text-sm text-text-muted">{t('common.kcalPerDay')}</span>
                 </div>
               </div>
               <div className="text-right">
@@ -262,9 +262,9 @@ export default function ResultsPage() {
       {/* Footer */}
       <footer className="border-t border-border-subtle py-4 px-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between text-xs text-text-muted">
-          <span>© 2025 MacroApp</span>
+          <span>{t('app.copyright')}</span>
           <Link to="/history" className="hover:text-text-secondary transition-colors">
-            View history
+            {t('app.viewHistory')}
           </Link>
         </div>
       </footer>
@@ -285,6 +285,7 @@ function MacroCard({
   percentage: number;
   color: 'protein' | 'carbs' | 'fats';
 }) {
+  const { t } = useTranslation();
   const colorClass = {
     protein: 'text-protein',
     carbs: 'text-carbs',
@@ -304,7 +305,7 @@ function MacroCard({
         <span className={cn("text-2xl font-semibold text-data", colorClass)}>
           {value}
         </span>
-        <span className="text-xs text-text-muted">g</span>
+        <span className="text-xs text-text-muted">{t('common.grams')}</span>
       </div>
       <div className="h-1 rounded-full bg-surface-muted overflow-hidden">
         <div
@@ -343,7 +344,7 @@ function DayCard({
       </p>
       <p className="text-xl font-semibold text-text-primary text-data mb-3">
         {calories}
-        <span className="text-xs text-text-muted font-normal ml-1">kcal</span>
+        <span className="text-xs text-text-muted font-normal ml-1">{t('common.kcal')}</span>
       </p>
       <div className="grid grid-cols-3 gap-2 text-xs">
         <div>

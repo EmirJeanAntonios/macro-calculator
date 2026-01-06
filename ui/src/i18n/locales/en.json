@@ -3,7 +3,12 @@
     "title": "Macro Calculator",
     "subtitle": "Calculate your perfect nutrition plan",
     "newCalculation": "New Calculation",
-    "history": "History"
+    "new": "New",
+    "history": "History",
+    "viewHistory": "View history",
+    "copyright": "© 2025 Macro Calculator",
+    "timeEstimate": "Takes about 2 minutes",
+    "pdf": "PDF"
   },
   "common": {
     "back": "Back",
@@ -11,7 +16,10 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "kcal": "kcal",
+    "kcalPerDay": "kcal/day",
+    "grams": "g"
   },
   "home": {
     "tellUs": "Tell Us About Yourself",

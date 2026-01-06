@@ -156,7 +156,7 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
                 ) : (
                   <>
                     <Moon className="w-4 h-4 text-text-muted" />
-                    <span className="text-[10px] text-text-muted">Rest</span>
+                    <span className="text-[10px] text-text-muted">{t('calendar.rest')}</span>
                   </>
                 )}
               </button>

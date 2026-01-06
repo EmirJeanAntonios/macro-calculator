@@ -3,7 +3,12 @@
     "title": "Makro Hesaplayıcı",
     "subtitle": "Mükemmel beslenme planınızı hesaplayın",
     "newCalculation": "Yeni Hesaplama",
-    "history": "Geçmiş"
+    "new": "Yeni",
+    "history": "Geçmiş",
+    "viewHistory": "Geçmişi gör",
+    "copyright": "© 2025 Macro Calculator",
+    "timeEstimate": "Yaklaşık 2 dakika sürer",
+    "pdf": "PDF"
   },
   "common": {
     "back": "Geri",
@@ -11,7 +16,10 @@
     "save": "Kaydet",
     "delete": "Sil",
     "edit": "Düzenle",
-    "loading": "Yükleniyor..."
+    "loading": "Yükleniyor...",
+    "kcal": "kcal",
+    "kcalPerDay": "kcal/gün",
+    "grams": "g"
   },
   "home": {
     "tellUs": "Kendiniz Hakkında Bilgi Verin",

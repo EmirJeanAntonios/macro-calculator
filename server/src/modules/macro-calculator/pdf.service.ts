@@ -46,8 +46,8 @@ export class PdfService {
       size: 'A4',
       margin: this.pageMargin,
       info: {
-        Title: 'MacroApp - Your Nutrition Plan',
-        Author: 'MacroApp',
+        Title: 'Macro Calculator - Your Nutrition Plan',
+        Author: 'Macro Calculator',
       },
     });
 
@@ -107,7 +107,7 @@ export class PdfService {
   }
 
   /**
-   * Header: MacroApp branding
+   * Header: Macro Calculator branding
    */
   private drawHeader(doc: PDFKit.PDFDocument): void {
     const y = this.pageMargin;
@@ -117,7 +117,7 @@ export class PdfService {
       .fontSize(16)
       .font('Helvetica-Bold')
       .fillColor(this.colors.textPrimary)
-      .text('MacroApp', this.pageMargin, y);
+      .text('Macro Calculator', this.pageMargin, y);
 
     // Subtitle
     doc
@@ -515,7 +515,7 @@ export class PdfService {
       .fontSize(8)
       .font('Helvetica')
       .fillColor(this.colors.textMuted)
-      .text('© 2025 MacroApp', this.pageMargin, footerY + 10);
+      .text('© 2025 Macro Calculator', this.pageMargin, footerY + 10);
 
     doc
       .text(

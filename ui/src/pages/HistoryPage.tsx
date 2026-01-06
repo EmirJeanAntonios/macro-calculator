@@ -25,7 +25,8 @@ export default function HistoryPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await macroService.getAllResults();
+      // Only fetch user's own calculations (stored in localStorage)
+      const response = await macroService.getUserHistory();
       if (response.success && response.data) {
         setResults(response.data);
       } else {
@@ -54,7 +55,7 @@ export default function HistoryPage() {
       <header className="border-b border-border-subtle">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/" className="text-sm font-semibold text-text-primary tracking-tight">
-            MacroApp
+            Macro Calculator
           </Link>
           <div className="flex items-center gap-1">
             <Link
@@ -62,7 +63,7 @@ export default function HistoryPage() {
               className="h-8 px-3 flex items-center gap-1.5 rounded-md text-sm text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">New</span>
+              <span className="hidden sm:inline">{t('app.new')}</span>
             </Link>
             <div className="h-8 px-3 flex items-center gap-1.5 rounded-md text-sm bg-surface-muted text-text-primary">
               <History className="w-3.5 h-3.5" />
@@ -148,7 +149,7 @@ export default function HistoryPage() {
                         <span className="text-xl font-semibold text-text-primary text-data">
                           {result.dailyCalories}
                         </span>
-                        <span className="text-xs text-text-muted">kcal</span>
+                        <span className="text-xs text-text-muted">{t('common.kcal')}</span>
                       </div>
 
                       {/* Macros */}
@@ -177,9 +178,9 @@ export default function HistoryPage() {
       {/* Footer */}
       <footer className="border-t border-border-subtle py-4 px-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between text-xs text-text-muted">
-          <span>© 2025 MacroApp</span>
+          <span>{t('app.copyright')}</span>
           <Link to="/" className="hover:text-text-secondary transition-colors">
-            New calculation
+            {t('app.newCalculation')}
           </Link>
         </div>
       </footer>

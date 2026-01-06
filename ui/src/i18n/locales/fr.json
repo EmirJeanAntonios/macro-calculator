@@ -3,7 +3,12 @@
     "title": "Calculateur de Macros",
     "subtitle": "Calculez votre plan nutritionnel parfait",
     "newCalculation": "Nouveau Calcul",
-    "history": "Historique"
+    "new": "Nouveau",
+    "history": "Historique",
+    "viewHistory": "Voir l'historique",
+    "copyright": "© 2025 Macro Calculator",
+    "timeEstimate": "Environ 2 minutes",
+    "pdf": "PDF"
   },
   "common": {
     "back": "Retour",
@@ -11,7 +16,10 @@
     "save": "Enregistrer",
     "delete": "Supprimer",
     "edit": "Modifier",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "kcal": "kcal",
+    "kcalPerDay": "kcal/jour",
+    "grams": "g"
   },
   "home": {
     "tellUs": "Parlez-nous de Vous",
