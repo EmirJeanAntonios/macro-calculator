@@ -6,10 +6,6 @@ import type { MacroResult } from '../types';
 import { macroService } from '../services/api';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
-
 export default function HistoryPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
