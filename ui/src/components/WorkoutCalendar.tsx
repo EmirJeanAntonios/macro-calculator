@@ -114,43 +114,101 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
 
   return (
     <div className="space-y-5">
-      {/* Week Grid */}
-      <div className="grid grid-cols-7 gap-1.5">
-        {/* Headers */}
-        {DAY_KEYS.map((day) => (
-          <div key={day} className="text-center text-[10px] text-text-muted pb-1">
-            {getDayShort(day)}
+      {/* Week Grid - Desktop: horizontal row, Mobile: 7-column grid */}
+      <div className="space-y-3">
+        {/* Desktop view: Full width with day names */}
+        <div className="hidden sm:grid grid-cols-7 gap-2">
+          {DAY_KEYS.map((day) => {
+            const dayWorkouts = schedule[day];
+            const hasWorkouts = dayWorkouts.length > 0;
+            const isSelected = selectedDay === day;
+            const firstWorkout = dayWorkouts[0];
+            const firstType = firstWorkout ? workoutTypes.find(t => t.key === firstWorkout.type) : null;
+            const FirstIcon = firstType?.icon ? ICON_MAP[firstType.icon] : null;
+
+            return (
+              <button
+                key={day}
+                onClick={() => {
+                  setSelectedDay(isSelected ? null : day);
+                  setAddingWorkout(false);
+                }}
+                className={cn(
+                  "rounded-lg p-3 flex flex-col items-center gap-1.5 transition-all min-h-[80px]",
+                  isSelected && "bg-accent/15 ring-2 ring-accent",
+                  !isSelected && hasWorkouts && "bg-surface-elevated border border-accent/30 hover:border-accent/50",
+                  !isSelected && !hasWorkouts && "bg-surface-muted border border-border-subtle hover:border-border-default"
+                )}
+              >
+                <span className={cn("text-[10px] uppercase tracking-wide", isSelected ? "text-accent" : "text-text-muted")}>
+                  {getDayShort(day)}
+                </span>
+                {hasWorkouts ? (
+                  <>
+                    {FirstIcon && <FirstIcon className={cn("w-5 h-5", isSelected ? "text-accent" : "text-text-primary")} />}
+                    <span className={cn("text-[10px] truncate max-w-full", isSelected ? "text-accent" : "text-text-secondary")}>
+                      {firstType?.name || firstWorkout.type}
+                    </span>
+                    {dayWorkouts.length > 1 && (
+                      <span className="text-[9px] text-text-muted">+{dayWorkouts.length - 1}</span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-4 h-4 text-text-muted" />
+                    <span className="text-[10px] text-text-muted">Rest</span>
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile view: Compact 7-column grid with icons */}
+        <div className="sm:hidden grid grid-cols-7 gap-1">
+          {DAY_KEYS.map((day) => {
+            const dayWorkouts = schedule[day];
+            const hasWorkouts = dayWorkouts.length > 0;
+            const isSelected = selectedDay === day;
+            const firstWorkout = dayWorkouts[0];
+            const firstType = firstWorkout ? workoutTypes.find(t => t.key === firstWorkout.type) : null;
+            const FirstIcon = firstType?.icon ? ICON_MAP[firstType.icon] : Moon;
+
+            return (
+              <button
+                key={day}
+                onClick={() => {
+                  setSelectedDay(isSelected ? null : day);
+                  setAddingWorkout(false);
+                }}
+                className={cn(
+                  "flex flex-col items-center gap-0.5 py-2 rounded-md transition-all",
+                  isSelected && "bg-accent/15 ring-1 ring-accent",
+                  !isSelected && hasWorkouts && "bg-surface-elevated",
+                  !isSelected && !hasWorkouts && "bg-surface-muted"
+                )}
+              >
+                <span className={cn("text-[9px] uppercase", isSelected ? "text-accent" : "text-text-muted")}>
+                  {getDayShort(day)}
+                </span>
+                <FirstIcon className={cn(
+                  "w-4 h-4",
+                  isSelected ? "text-accent" : hasWorkouts ? "text-text-primary" : "text-text-muted"
+                )} />
+                {hasWorkouts && dayWorkouts.length > 1 && (
+                  <span className="text-[8px] text-accent">+{dayWorkouts.length - 1}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile: Selected day workout name display */}
+        {!selectedDay && (
+          <div className="sm:hidden text-center text-xs text-text-muted py-1">
+            {t('calendar.tapToEdit')}
           </div>
-        ))}
-
-        {/* Day Cells */}
-        {DAY_KEYS.map((day) => {
-          const dayWorkouts = schedule[day];
-          const hasWorkouts = dayWorkouts.length > 0;
-          const isSelected = selectedDay === day;
-
-          return (
-            <button
-              key={day}
-              onClick={() => {
-                setSelectedDay(isSelected ? null : day);
-                setAddingWorkout(false);
-              }}
-              className={cn(
-                "aspect-square rounded-md flex flex-col items-center justify-center gap-0.5 transition-colors text-xs",
-                isSelected && "bg-accent/20 ring-1 ring-accent",
-                !isSelected && hasWorkouts && "bg-surface-elevated border border-border-subtle",
-                !isSelected && !hasWorkouts && "bg-surface-muted border border-border-subtle hover:border-border-default"
-              )}
-            >
-              {hasWorkouts ? (
-                <span className="text-text-primary font-medium">{dayWorkouts.length}</span>
-              ) : (
-                <Moon className="w-3.5 h-3.5 text-text-muted" />
-              )}
-            </button>
-          );
-        })}
+        )}
       </div>
 
       {/* Selected Day Panel */}
@@ -193,22 +251,24 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
             <div className="space-y-3 p-3 bg-surface rounded-md">
               <div>
                 <p className="text-xs text-text-muted mb-2">{t('calendar.workoutType')}</p>
-                <div className="grid grid-cols-5 gap-1.5">
-                  {selectableTypes.slice(0, 10).map((type) => {
+                {/* Workout Type Grid - responsive: 2 cols on mobile, 3 on larger screens */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
+                  {selectableTypes.map((type) => {
                     const Icon = type.icon ? ICON_MAP[type.icon] : Dumbbell;
+                    const isSelected = newWorkoutType === type.key;
                     return (
                       <button
                         key={type.key}
                         onClick={() => setNewWorkoutType(type.key)}
                         className={cn(
-                          "aspect-square rounded-md flex items-center justify-center transition-colors",
-                          newWorkoutType === type.key
-                            ? "bg-accent text-background"
-                            : "bg-surface-muted text-text-muted hover:text-text-primary"
+                          "flex items-center gap-2 px-3 py-2.5 rounded-md transition-all text-left",
+                          isSelected
+                            ? "bg-accent text-background ring-2 ring-accent ring-offset-1 ring-offset-surface"
+                            : "bg-surface-muted text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                         )}
-                        title={type.name}
                       >
-                        <Icon className="w-4 h-4" />
+                        <Icon className={cn("w-4 h-4 flex-shrink-0", isSelected ? "text-background" : "text-text-muted")} />
+                        <span className="text-xs font-medium truncate">{type.name}</span>
                       </button>
                     );
                   })}
@@ -224,23 +284,23 @@ export default function WorkoutCalendar({ onSubmit, onBack }: WorkoutCalendarPro
                     step="0.5"
                     value={newWorkoutHours}
                     onChange={(e) => setNewWorkoutHours(parseFloat(e.target.value))}
-                    className="flex-1 accent-accent"
+                    className="flex-1 accent-accent h-2 rounded-full"
                   />
-                  <span className="text-sm text-text-primary tabular-nums w-8">{newWorkoutHours}h</span>
+                  <span className="text-sm text-text-primary tabular-nums w-10 text-right">{newWorkoutHours}h</span>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-1">
                 <button
                   onClick={() => setAddingWorkout(false)}
-                  className="flex-1 h-8 text-xs text-text-muted hover:text-text-primary"
+                  className="flex-1 h-9 text-sm text-text-muted hover:text-text-primary rounded-md border border-border-subtle hover:border-border-default transition-colors"
                 >
                   {t('common.cancel')}
                 </button>
                 <button
                   onClick={() => addWorkout(selectedDay)}
-                  className="flex-1 h-8 bg-accent text-background text-xs font-medium rounded-md hover:bg-accent-muted"
+                  className="flex-1 h-9 bg-accent text-background text-sm font-medium rounded-md hover:bg-accent-muted transition-colors"
                 >
-                  Add
+                  {t('calendar.addWorkout')}
                 </button>
               </div>
             </div>

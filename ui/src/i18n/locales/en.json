@@ -59,6 +59,7 @@
     "workoutType": "Workout Type",
     "workoutDays": "Workout Days",
     "restDays": "Rest Days",
+    "tapToEdit": "Tap a day to add workouts",
     "days": {
       "monday": "Monday",
       "tuesday": "Tuesday",

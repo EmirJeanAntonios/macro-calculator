@@ -59,6 +59,7 @@
     "workoutType": "Tipo de Entrenamiento",
     "workoutDays": "Días de Entrenamiento",
     "restDays": "Días de Descanso",
+    "tapToEdit": "Toca un día para agregar entrenamientos",
     "days": {
       "monday": "Lunes",
       "tuesday": "Martes",

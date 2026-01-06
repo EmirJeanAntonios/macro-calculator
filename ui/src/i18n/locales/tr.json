@@ -59,6 +59,7 @@
     "workoutType": "Antrenman Türü",
     "workoutDays": "Antrenman Günleri",
     "restDays": "Dinlenme Günleri",
+    "tapToEdit": "Antrenman eklemek için bir güne dokunun",
     "days": {
       "monday": "Pazartesi",
       "tuesday": "Salı",
