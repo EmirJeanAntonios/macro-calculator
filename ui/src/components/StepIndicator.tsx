@@ -10,43 +10,48 @@ interface StepIndicatorProps {
   currentStep: number;
 }
 
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
+}
+
 export default function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
   return (
-    <div className="flex items-center justify-center gap-2 mb-8">
+    <div className="flex items-center justify-center gap-2 mb-6">
       {steps.map((step, index) => {
         const isCompleted = currentStep > step.id;
         const isCurrent = currentStep === step.id;
 
         return (
           <div key={step.id} className="flex items-center">
-            {/* Step Circle */}
+            {/* Step Indicator */}
             <div
-              className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition-all ${
-                isCompleted
-                  ? 'bg-emerald-500 text-white'
-                  : isCurrent
-                    ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/30'
-                    : 'bg-slate-800 text-slate-500 border-2 border-slate-700'
-              }`}
+              className={cn(
+                "w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
+                isCompleted && "bg-accent text-background",
+                isCurrent && "bg-surface-elevated border border-accent text-accent",
+                !isCompleted && !isCurrent && "bg-surface-muted border border-border-subtle text-text-muted"
+              )}
             >
-              {isCompleted ? <Check className="w-5 h-5" /> : step.id}
+              {isCompleted ? <Check className="w-3.5 h-3.5" /> : step.id}
             </div>
 
-            {/* Step Label */}
+            {/* Label */}
             <span
-              className={`ml-2 text-sm font-medium hidden sm:block ${
-                isCurrent ? 'text-white' : 'text-slate-500'
-              }`}
+              className={cn(
+                "ml-2 text-xs hidden sm:block transition-colors",
+                isCurrent ? "text-text-primary" : "text-text-muted"
+              )}
             >
               {step.label}
             </span>
 
-            {/* Connector Line */}
+            {/* Connector */}
             {index < steps.length - 1 && (
               <div
-                className={`w-8 sm:w-16 h-0.5 mx-3 ${
-                  isCompleted ? 'bg-emerald-500' : 'bg-slate-700'
-                }`}
+                className={cn(
+                  "w-8 sm:w-12 h-px mx-3",
+                  isCompleted ? "bg-accent" : "bg-border-subtle"
+                )}
               />
             )}
           </div>
@@ -55,4 +60,3 @@ export default function StepIndicator({ steps, currentStep }: StepIndicatorProps
     </div>
   );
 }
-

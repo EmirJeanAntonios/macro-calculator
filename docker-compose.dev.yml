@@ -1,7 +1,11 @@
-# Development Docker Compose
+# Development Docker Compose - Hot Reload Enabled
 # Usage: docker compose -f docker-compose.dev.yml up
 #
-# This exposes all ports for local development and debugging
+# All services have hot reload enabled for rapid development
+# Frontend: http://localhost:5173
+# Admin Panel: http://localhost:5174
+# Backend API: http://localhost:3001
+# pgAdmin: http://localhost:5050
 
 services:
   # PostgreSQL Database - Exposed for local development tools
@@ -22,12 +26,12 @@ services:
       timeout: 5s
       retries: 5
 
-  # NestJS Backend - Hot reload enabled
+  # NestJS Backend - Hot reload with watch mode
   backend:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+    image: node:20-alpine
     container_name: macro-calculator-backend-dev
+    working_dir: /app
+    command: sh -c "npm install && npm run start:dev"
     ports:
       - "3001:3001"
     environment:
@@ -40,9 +44,50 @@ services:
       DB_DATABASE: ${DB_DATABASE:-macro_calculator}
       FRONTEND_URL: http://localhost:5173
       JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-not-for-production}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-DevAdmin12345}
+    volumes:
+      - ./server:/app
+      - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
+
+  # React Frontend - Hot reload with Vite
+  frontend:
+    image: node:20-alpine
+    container_name: macro-calculator-frontend-dev
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    environment:
+      # Use Docker service name for internal proxy
+      VITE_API_URL: http://backend:3001
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # React Admin Panel - Hot reload with Vite
+  admin:
+    image: node:20-alpine
+    container_name: macro-calculator-admin-dev
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5174"
+    ports:
+      - "5174:5174"
+    environment:
+      # Use Docker service name for internal proxy
+      VITE_API_URL: http://backend:3001
+    volumes:
+      - ./admin:/app
+      - /app/node_modules
+    depends_on:
+      - backend
     restart: unless-stopped
 
   # pgAdmin - Database management UI (dev only)

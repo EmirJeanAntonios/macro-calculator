@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Scale, Ruler, Target } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import type { UserInput, WeightUnit, HeightUnit } from '../types';
 
 interface UserInputFormProps {
   onSubmit: (data: UserInput) => void;
   initialData?: Partial<UserInput>;
+}
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
 }
 
 export default function UserInputForm({ onSubmit, initialData }: UserInputFormProps) {
@@ -20,7 +24,6 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
     goal: initialData?.goal || 'maintenance',
   });
 
-  // Separate string state for number inputs to allow empty values while typing
   const [inputValues, setInputValues] = useState({
     age: String(initialData?.age || 25),
     weight: String(initialData?.weight || 70),
@@ -31,22 +34,13 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof UserInput, string>> = {};
-
     const age = parseFloat(inputValues.age) || 0;
     const weight = parseFloat(inputValues.weight) || 0;
     const height = parseFloat(inputValues.height) || 0;
 
-    if (age < 13 || age > 120) {
-      newErrors.age = t('form.validation.ageRange');
-    }
-
-    if (weight <= 0 || weight > 700) {
-      newErrors.weight = t('form.validation.validWeight');
-    }
-
-    if (height <= 0 || height > 300) {
-      newErrors.height = t('form.validation.validHeight');
-    }
+    if (age < 13 || age > 120) newErrors.age = t('form.validation.ageRange');
+    if (weight <= 0 || weight > 700) newErrors.weight = t('form.validation.validWeight');
+    if (height <= 0 || height > 300) newErrors.height = t('form.validation.validHeight');
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -54,7 +48,6 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Update formData with parsed values before validation
     const updatedFormData = {
       ...formData,
       age: parseInt(inputValues.age) || 0,
@@ -62,273 +55,168 @@ export default function UserInputForm({ onSubmit, initialData }: UserInputFormPr
       height: parseFloat(inputValues.height) || 0,
     };
     setFormData(updatedFormData);
-    
-    if (validateForm()) {
-      onSubmit(updatedFormData);
-    }
+    if (validateForm()) onSubmit(updatedFormData);
   };
 
   const updateField = <K extends keyof UserInput>(field: K, value: UserInput[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const updateNumberInput = (field: 'age' | 'weight' | 'height', value: string) => {
     setInputValues((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Age & Gender Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Age */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-            <User className="w-4 h-4 text-emerald-400" />
-            {t('form.age')}
-          </label>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Age & Gender */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs text-text-muted mb-1.5">{t('form.age')}</label>
           <input
             type="number"
             value={inputValues.age}
             onChange={(e) => updateNumberInput('age', e.target.value)}
-            className={`w-full px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
-              errors.age
-                ? 'border-red-500 focus:ring-red-500/50'
-                : 'border-slate-700 focus:ring-emerald-500/50 focus:border-emerald-500'
-            }`}
-            placeholder={t('form.enterAge')}
+            className={cn(
+              "w-full h-10 px-3 rounded-md bg-surface-muted border text-sm text-text-primary",
+              "placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent transition-colors",
+              errors.age ? "border-error" : "border-border-subtle"
+            )}
             min={13}
             max={120}
           />
-          {errors.age && <p className="text-red-400 text-sm">{errors.age}</p>}
+          {errors.age && <p className="mt-1 text-xs text-error">{errors.age}</p>}
         </div>
 
-        {/* Gender */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-            <User className="w-4 h-4 text-cyan-400" />
-            {t('form.gender')}
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <GenderButton
-              selected={formData.gender === 'male'}
-              onClick={() => updateField('gender', 'male')}
-              label={t('form.male')}
-            />
-            <GenderButton
-              selected={formData.gender === 'female'}
-              onClick={() => updateField('gender', 'female')}
-              label={t('form.female')}
-            />
+        <div>
+          <label className="block text-xs text-text-muted mb-1.5">{t('form.gender')}</label>
+          <div className="grid grid-cols-2 gap-2">
+            {['male', 'female'].map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => updateField('gender', g as 'male' | 'female')}
+                className={cn(
+                  "h-10 rounded-md text-sm font-medium transition-colors",
+                  formData.gender === g
+                    ? "bg-accent text-background"
+                    : "bg-surface-muted border border-border-subtle text-text-secondary hover:text-text-primary"
+                )}
+              >
+                {t(`form.${g}`)}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Weight */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-          <Scale className="w-4 h-4 text-indigo-400" />
-          {t('form.weight')}
-        </label>
-        <div className="flex gap-3">
+      <div>
+        <label className="block text-xs text-text-muted mb-1.5">{t('form.weight')}</label>
+        <div className="flex gap-2">
           <input
             type="number"
             value={inputValues.weight}
             onChange={(e) => updateNumberInput('weight', e.target.value)}
-            className={`flex-1 px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
-              errors.weight
-                ? 'border-red-500 focus:ring-red-500/50'
-                : 'border-slate-700 focus:ring-emerald-500/50 focus:border-emerald-500'
-            }`}
-            placeholder={t('form.enterWeight')}
+            className={cn(
+              "flex-1 h-10 px-3 rounded-md bg-surface-muted border text-sm text-text-primary",
+              "placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent transition-colors",
+              errors.weight ? "border-error" : "border-border-subtle"
+            )}
             step="0.1"
           />
-          <UnitToggle
-            options={[
-              { value: 'kg', label: 'kg' },
-              { value: 'lbs', label: 'lbs' },
-            ]}
-            value={formData.weightUnit}
-            onChange={(value) => updateField('weightUnit', value as WeightUnit)}
-          />
+          <div className="flex bg-surface-muted border border-border-subtle rounded-md overflow-hidden">
+            {(['kg', 'lbs'] as WeightUnit[]).map((unit) => (
+              <button
+                key={unit}
+                type="button"
+                onClick={() => updateField('weightUnit', unit)}
+                className={cn(
+                  "w-12 h-10 text-sm font-medium transition-colors",
+                  formData.weightUnit === unit
+                    ? "bg-accent text-background"
+                    : "text-text-secondary hover:text-text-primary"
+                )}
+              >
+                {unit}
+              </button>
+            ))}
+          </div>
         </div>
-        {errors.weight && <p className="text-red-400 text-sm">{errors.weight}</p>}
+        {errors.weight && <p className="mt-1 text-xs text-error">{errors.weight}</p>}
       </div>
 
       {/* Height */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-          <Ruler className="w-4 h-4 text-amber-400" />
-          {t('form.height')}
-        </label>
-        <div className="flex gap-3">
+      <div>
+        <label className="block text-xs text-text-muted mb-1.5">{t('form.height')}</label>
+        <div className="flex gap-2">
           <input
             type="number"
             value={inputValues.height}
             onChange={(e) => updateNumberInput('height', e.target.value)}
-            className={`flex-1 px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
-              errors.height
-                ? 'border-red-500 focus:ring-red-500/50'
-                : 'border-slate-700 focus:ring-emerald-500/50 focus:border-emerald-500'
-            }`}
-            placeholder={t('form.enterHeight')}
+            className={cn(
+              "flex-1 h-10 px-3 rounded-md bg-surface-muted border text-sm text-text-primary",
+              "placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent transition-colors",
+              errors.height ? "border-error" : "border-border-subtle"
+            )}
             step="0.1"
           />
-          <UnitToggle
-            options={[
-              { value: 'cm', label: 'cm' },
-              { value: 'ft', label: 'ft' },
-            ]}
-            value={formData.heightUnit}
-            onChange={(value) => updateField('heightUnit', value as HeightUnit)}
-          />
+          <div className="flex bg-surface-muted border border-border-subtle rounded-md overflow-hidden">
+            {(['cm', 'ft'] as HeightUnit[]).map((unit) => (
+              <button
+                key={unit}
+                type="button"
+                onClick={() => updateField('heightUnit', unit)}
+                className={cn(
+                  "w-12 h-10 text-sm font-medium transition-colors",
+                  formData.heightUnit === unit
+                    ? "bg-accent text-background"
+                    : "text-text-secondary hover:text-text-primary"
+                )}
+              >
+                {unit}
+              </button>
+            ))}
+          </div>
         </div>
-        {errors.height && <p className="text-red-400 text-sm">{errors.height}</p>}
+        {errors.height && <p className="mt-1 text-xs text-error">{errors.height}</p>}
       </div>
 
       {/* Goal */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-          <Target className="w-4 h-4 text-rose-400" />
-          {t('form.goal')}
-        </label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <GoalButton
-            selected={formData.goal === 'weight_loss'}
-            onClick={() => updateField('goal', 'weight_loss')}
-            label={t('form.weightLoss')}
-            description={t('form.calorieDeficit')}
-            color="rose"
-          />
-          <GoalButton
-            selected={formData.goal === 'maintenance'}
-            onClick={() => updateField('goal', 'maintenance')}
-            label={t('form.maintenance')}
-            description={t('form.balancedDiet')}
-            color="amber"
-          />
-          <GoalButton
-            selected={formData.goal === 'muscle_gain'}
-            onClick={() => updateField('goal', 'muscle_gain')}
-            label={t('form.muscleGain')}
-            description={t('form.calorieSurplus')}
-            color="emerald"
-          />
+      <div>
+        <label className="block text-xs text-text-muted mb-1.5">{t('form.goal')}</label>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { key: 'weight_loss', label: t('form.weightLoss') },
+            { key: 'maintenance', label: t('form.maintenance') },
+            { key: 'muscle_gain', label: t('form.muscleGain') },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => updateField('goal', key as UserInput['goal'])}
+              className={cn(
+                "h-10 rounded-md text-sm font-medium transition-colors",
+                formData.goal === key
+                  ? "bg-accent text-background"
+                  : "bg-surface-muted border border-border-subtle text-text-secondary hover:text-text-primary"
+              )}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Submit Button */}
+      {/* Submit */}
       <button
         type="submit"
-        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/25"
+        className="w-full h-11 mt-4 flex items-center justify-center gap-2 rounded-md bg-accent text-background text-sm font-medium hover:bg-accent-muted transition-colors"
       >
         {t('form.continue')}
+        <ChevronRight className="w-4 h-4" />
       </button>
     </form>
-  );
-}
-
-// Helper Components
-function GenderButton({
-  selected,
-  onClick,
-  label,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-        selected
-          ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-2 border-emerald-500 text-emerald-400'
-          : 'bg-slate-800/50 border-2 border-slate-700 text-slate-400 hover:border-slate-600'
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function UnitToggle({
-  options,
-  value,
-  onChange,
-}: {
-  options: { value: string; label: string }[];
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="flex bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden">
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          onClick={() => onChange(option.value)}
-          className={`px-4 py-3 font-medium transition-all ${
-            value === option.value
-              ? 'bg-emerald-500 text-white'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function GoalButton({
-  selected,
-  onClick,
-  label,
-  description,
-  color,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  label: string;
-  description: string;
-  color: 'rose' | 'amber' | 'emerald';
-}) {
-  const colorClasses = {
-    rose: {
-      selected: 'from-rose-500/20 to-pink-500/20 border-rose-500 text-rose-400',
-      icon: 'text-rose-400',
-    },
-    amber: {
-      selected: 'from-amber-500/20 to-orange-500/20 border-amber-500 text-amber-400',
-      icon: 'text-amber-400',
-    },
-    emerald: {
-      selected: 'from-emerald-500/20 to-teal-500/20 border-emerald-500 text-emerald-400',
-      icon: 'text-emerald-400',
-    },
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-4 py-4 rounded-xl text-left transition-all ${
-        selected
-          ? `bg-gradient-to-r ${colorClasses[color].selected} border-2`
-          : 'bg-slate-800/50 border-2 border-slate-700 text-slate-400 hover:border-slate-600'
-      }`}
-    >
-      <div className={`font-semibold ${selected ? colorClasses[color].icon : ''}`}>
-        {label}
-      </div>
-      <div className="text-sm opacity-70">{description}</div>
-    </button>
   );
 }

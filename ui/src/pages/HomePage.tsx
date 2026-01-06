@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Calculator, Loader2, History, Plus } from 'lucide-react';
+import { Loader2, History, ChevronRight } from 'lucide-react';
 import { UserInputForm, StepIndicator, WorkoutCalendar } from '../components';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import type { UserInput, Workout, CalculateRequest } from '../types';
 import { macroService } from '../services/api';
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
+}
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -33,11 +37,7 @@ export default function HomePage() {
     setError(null);
 
     try {
-      const request: CalculateRequest = {
-        userInput,
-        workouts,
-      };
-
+      const request: CalculateRequest = { userInput, workouts };
       const response = await macroService.calculate(request);
 
       if (response.success && response.data) {
@@ -52,101 +52,107 @@ export default function HomePage() {
     }
   };
 
-  const handleBack = () => {
-    setCurrentStep(1);
-  };
-
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="py-6 px-8 border-b border-white/10">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="p-2 bg-emerald-500/20 rounded-xl">
-              <Calculator className="w-8 h-8 text-emerald-400" />
-            </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-              {t('app.title')}
-            </h1>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header - Minimal */}
+      <header className="border-b border-border-subtle">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+          <Link to="/" className="text-sm font-semibold text-text-primary tracking-tight">
+            MacroApp
           </Link>
-          <nav className="flex items-center gap-2 sm:gap-4">
-            <Link
-              to="/"
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('app.newCalculation')}</span>
-            </Link>
+          <div className="flex items-center gap-1">
             <Link
               to="/history"
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+              className={cn(
+                "h-8 px-3 flex items-center gap-1.5 rounded-md text-sm",
+                "text-text-secondary hover:text-text-primary hover:bg-surface-muted",
+                "transition-colors"
+              )}
             >
-              <History className="w-4 h-4" />
+              <History className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{t('app.history')}</span>
             </Link>
             <LanguageSwitcher />
-          </nav>
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 py-12 px-8">
-        <div className="max-w-2xl mx-auto">
+      {/* Main */}
+      <main className="flex-1 py-8 px-4">
+        <div className="max-w-lg mx-auto">
           {/* Step Indicator */}
           <StepIndicator steps={STEPS} currentStep={currentStep} />
 
-          {/* Error Message */}
+          {/* Error */}
           {error && (
-            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-center">
+            <div className="mb-4 p-3 rounded-md bg-error/10 border border-error/20 text-error text-sm">
               {error}
             </div>
           )}
 
           {/* Loading Overlay */}
           {isLoading && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-              <div className="bg-slate-800 p-8 rounded-2xl flex flex-col items-center gap-4">
-                <Loader2 className="w-12 h-12 text-emerald-400 animate-spin" />
-                <p className="text-white font-medium">{t('home.calculating')}</p>
+            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-6 h-6 text-accent animate-spin" />
+                <p className="text-sm text-text-secondary">{t('home.calculating')}</p>
               </div>
             </div>
           )}
 
-          {/* Step Content */}
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
+          {/* Content Card */}
+          <div className="bg-surface border border-border-subtle rounded-lg p-6">
             {currentStep === 1 && (
-              <>
-                <h2 className="text-2xl font-bold mb-2 text-center">
-                  {t('home.tellUs')}
-                </h2>
-                <p className="text-slate-400 text-center mb-8">
-                  {t('home.enterDetails')}
-                </p>
+              <div className="animate-fadeIn">
+                <div className="mb-6">
+                  <h1 className="text-lg font-semibold text-text-primary mb-1">
+                    {t('home.tellUs')}
+                  </h1>
+                  <p className="text-sm text-text-secondary">
+                    {t('home.enterDetails')}
+                  </p>
+                </div>
                 <UserInputForm
                   onSubmit={handleUserInputSubmit}
                   initialData={userInput || undefined}
                 />
-              </>
+              </div>
             )}
 
             {currentStep === 2 && (
-              <>
-                <h2 className="text-2xl font-bold mb-2 text-center">
-                  {t('home.workoutSchedule')}
-                </h2>
-                <p className="text-slate-400 text-center mb-8">
-                  {t('home.setWorkoutPlan')}
-                </p>
-                <WorkoutCalendar onSubmit={handleWorkoutSubmit} onBack={handleBack} />
-              </>
+              <div className="animate-fadeIn">
+                <div className="mb-6">
+                  <h1 className="text-lg font-semibold text-text-primary mb-1">
+                    {t('home.workoutSchedule')}
+                  </h1>
+                  <p className="text-sm text-text-secondary">
+                    {t('home.setWorkoutPlan')}
+                  </p>
+                </div>
+                <WorkoutCalendar
+                  onSubmit={handleWorkoutSubmit}
+                  onBack={() => setCurrentStep(1)}
+                />
+              </div>
             )}
           </div>
+
+          {/* Footer hint */}
+          <p className="mt-4 text-center text-xs text-text-muted flex items-center justify-center gap-1">
+            <ChevronRight className="w-3 h-3" />
+            Takes about 2 minutes
+          </p>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="py-6 px-8 border-t border-white/10 text-center text-slate-500 text-sm">
-        <p>{t('app.title')} — {t('app.subtitle')}</p>
+      <footer className="border-t border-border-subtle py-4 px-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-between text-xs text-text-muted">
+          <span>© 2025 MacroApp</span>
+          <Link to="/history" className="hover:text-text-secondary transition-colors">
+            View history
+          </Link>
+        </div>
       </footer>
     </div>
   );

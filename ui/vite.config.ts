@@ -6,10 +6,12 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    port: 3000,
+    host: '0.0.0.0',
+    port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        // In Docker, use 'backend' service name; locally use localhost
+        target: process.env.VITE_API_URL || 'http://backend:3001',
         changeOrigin: true,
       },
     },

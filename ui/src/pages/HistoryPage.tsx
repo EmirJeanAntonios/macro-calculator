@@ -1,18 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { 
-  History, 
-  Calculator, 
-  Flame, 
-  Calendar, 
-  ChevronRight, 
-  Loader2,
-  Plus
-} from 'lucide-react';
+import { History, Loader2, Plus, ChevronRight, RefreshCw, Calendar } from 'lucide-react';
 import type { MacroResult } from '../types';
 import { macroService } from '../services/api';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
+}
 
 export default function HistoryPage() {
   const { t, i18n } = useTranslation();
@@ -28,7 +24,6 @@ export default function HistoryPage() {
   const loadResults = async () => {
     setIsLoading(true);
     setError(null);
-    
     try {
       const response = await macroService.getAllResults();
       if (response.success && response.data) {
@@ -45,97 +40,64 @@ export default function HistoryPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const localeMap: Record<string, string> = {
-      en: 'en-US',
-      es: 'es-ES',
-      tr: 'tr-TR',
-      fr: 'fr-FR',
-    };
+    const localeMap: Record<string, string> = { en: 'en-US', es: 'es-ES', tr: 'tr-TR', fr: 'fr-FR' };
     return new Intl.DateTimeFormat(localeMap[i18n.language] || 'en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
     }).format(date);
   };
 
-  const getGoalLabel = (goal?: string) => {
-    if (!goal) return '';
-    return t(`history.goals.${goal}`);
-  };
-
-  const getGoalColor = (goal?: string) => {
-    switch (goal) {
-      case 'weight_loss': return 'text-rose-400 bg-rose-500/20';
-      case 'muscle_gain': return 'text-emerald-400 bg-emerald-500/20';
-      case 'maintenance': return 'text-cyan-400 bg-cyan-500/20';
-      default: return 'text-slate-400 bg-slate-500/20';
-    }
-  };
+  const getGoalLabel = (goal?: string) => goal ? t(`history.goals.${goal}`) : '';
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="py-6 px-8 border-b border-white/10">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="p-2 bg-emerald-500/20 rounded-xl">
-              <Calculator className="w-8 h-8 text-emerald-400" />
-            </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-              {t('app.title')}
-            </h1>
+      <header className="border-b border-border-subtle">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+          <Link to="/" className="text-sm font-semibold text-text-primary tracking-tight">
+            MacroApp
           </Link>
-          <nav className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-1">
             <Link
               to="/"
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+              className="h-8 px-3 flex items-center gap-1.5 rounded-md text-sm text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('app.newCalculation')}</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">New</span>
             </Link>
-            <Link
-              to="/history"
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400"
-            >
-              <History className="w-4 h-4" />
+            <div className="h-8 px-3 flex items-center gap-1.5 rounded-md text-sm bg-surface-muted text-text-primary">
+              <History className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{t('app.history')}</span>
-            </Link>
+            </div>
             <LanguageSwitcher />
-          </nav>
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 py-12 px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-3 bg-amber-500/20 rounded-xl">
-              <History className="w-6 h-6 text-amber-400" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">{t('history.title')}</h2>
-              <p className="text-slate-400">{t('history.subtitle')}</p>
-            </div>
+      {/* Main */}
+      <main className="flex-1 py-6 px-4">
+        <div className="max-w-lg mx-auto">
+          {/* Page Title */}
+          <div className="mb-6">
+            <h1 className="text-lg font-semibold text-text-primary">{t('history.title')}</h1>
+            <p className="text-sm text-text-secondary">{t('history.subtitle')}</p>
           </div>
 
-          {/* Loading State */}
+          {/* Loading */}
           {isLoading && (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-12 h-12 text-emerald-400 animate-spin mb-4" />
-              <p className="text-slate-400">{t('history.loading')}</p>
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
             </div>
           )}
 
-          {/* Error State */}
+          {/* Error */}
           {error && !isLoading && (
-            <div className="p-6 bg-red-500/20 border border-red-500/50 rounded-2xl text-center">
-              <p className="text-red-400 mb-4">{error}</p>
+            <div className="p-4 rounded-md bg-error/10 border border-error/20 text-center">
+              <p className="text-sm text-error mb-3">{error}</p>
               <button
                 onClick={loadResults}
-                className="px-4 py-2 bg-red-500/30 hover:bg-red-500/40 rounded-lg text-red-300 transition-colors"
+                className="h-8 px-3 inline-flex items-center gap-1.5 text-sm text-error hover:underline"
               >
+                <RefreshCw className="w-3.5 h-3.5" />
                 {t('history.tryAgain')}
               </button>
             </div>
@@ -143,17 +105,15 @@ export default function HistoryPage() {
 
           {/* Empty State */}
           {!isLoading && !error && results.length === 0 && (
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 p-12 text-center">
-              <div className="p-4 bg-slate-700/50 rounded-full inline-block mb-4">
-                <Calculator className="w-12 h-12 text-slate-500" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{t('history.noResults')}</h3>
-              <p className="text-slate-400 mb-6">{t('history.startFirst')}</p>
+            <div className="bg-surface border border-border-subtle rounded-lg p-8 text-center">
+              <History className="w-10 h-10 text-text-muted mx-auto mb-4" />
+              <h3 className="text-sm font-medium text-text-primary mb-1">{t('history.noResults')}</h3>
+              <p className="text-xs text-text-secondary mb-4">{t('history.startFirst')}</p>
               <button
                 onClick={() => navigate('/')}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-xl font-medium hover:opacity-90 transition-opacity"
+                className="h-9 px-4 inline-flex items-center gap-2 bg-accent text-background text-sm font-medium rounded-md hover:bg-accent-muted transition-colors"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
                 {t('history.createCalculation')}
               </button>
             </div>
@@ -161,62 +121,53 @@ export default function HistoryPage() {
 
           {/* Results List */}
           {!isLoading && !error && results.length > 0 && (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {results.map((result) => (
-                <div
+                <button
                   key={result.id}
                   onClick={() => navigate(`/results/${result.id}`)}
-                  className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 p-6 hover:border-emerald-500/50 hover:bg-slate-800/70 transition-all cursor-pointer group"
+                  className="w-full bg-surface border border-border-subtle rounded-lg p-4 text-left hover:border-border-default transition-colors group"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
                       {/* Date & Goal */}
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="flex items-center gap-2 text-slate-400 text-sm">
-                          <Calendar className="w-4 h-4" />
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-text-muted flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
                           {formatDate(result.calculatedAt)}
-                        </div>
-                        {result.userInput && (
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getGoalColor(result.userInput.goal)}`}>
+                        </span>
+                        {result.userInput?.goal && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-muted text-text-secondary">
                             {getGoalLabel(result.userInput.goal)}
                           </span>
                         )}
                       </div>
 
-                      {/* Macros Summary */}
-                      <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2">
-                          <Flame className="w-5 h-5 text-orange-400" />
-                          <span className="text-xl font-bold">{result.dailyCalories}</span>
-                          <span className="text-slate-500 text-sm">{t('results.kcal')}</span>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-rose-400"></div>
-                            <span className="text-slate-400">P: <span className="text-white font-medium">{result.protein}g</span></span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-amber-400"></div>
-                            <span className="text-slate-400">C: <span className="text-white font-medium">{result.carbs}g</span></span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
-                            <span className="text-slate-400">F: <span className="text-white font-medium">{result.fats}g</span></span>
-                          </div>
-                        </div>
+                      {/* Calories */}
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-xl font-semibold text-text-primary text-data">
+                          {result.dailyCalories}
+                        </span>
+                        <span className="text-xs text-text-muted">kcal</span>
                       </div>
 
-                      {/* User Info */}
-                      {result.userInput && (
-                        <div className="mt-3 text-sm text-slate-500">
-                          {result.userInput.age} • {result.userInput.weight}{result.userInput.weightUnit} • {result.userInput.height}{result.userInput.heightUnit}
-                        </div>
-                      )}
+                      {/* Macros */}
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="text-text-muted">
+                          P <span className="text-protein tabular-nums">{result.protein}g</span>
+                        </span>
+                        <span className="text-text-muted">
+                          C <span className="text-carbs tabular-nums">{result.carbs}g</span>
+                        </span>
+                        <span className="text-text-muted">
+                          F <span className="text-fats tabular-nums">{result.fats}g</span>
+                        </span>
+                      </div>
                     </div>
 
-                    <ChevronRight className="w-6 h-6 text-slate-600 group-hover:text-emerald-400 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-text-muted group-hover:text-text-primary transition-colors" />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -224,8 +175,13 @@ export default function HistoryPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 px-8 border-t border-white/10 text-center text-slate-500 text-sm">
-        <p>{t('app.title')} — {t('app.subtitle')}</p>
+      <footer className="border-t border-border-subtle py-4 px-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-between text-xs text-text-muted">
+          <span>© 2025 MacroApp</span>
+          <Link to="/" className="hover:text-text-secondary transition-colors">
+            New calculation
+          </Link>
+        </div>
       </footer>
     </div>
   );

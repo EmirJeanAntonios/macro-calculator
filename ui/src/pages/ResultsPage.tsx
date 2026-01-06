@@ -1,22 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Download,
-  Loader2,
-  Calculator,
-  Flame,
-  Activity,
-  RefreshCw,
-  History,
-  Plus,
-} from 'lucide-react';
+import { Download, Loader2, RefreshCw, History, ChevronRight } from 'lucide-react';
 import type { MacroResult } from '../types';
 import { macroService } from '../services/api';
-import MacroCard from '../components/MacroCard';
-import CalorieRing from '../components/CalorieRing';
-import SpecialDayCard from '../components/SpecialDayCard';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
+}
 
 export default function ResultsPage() {
   const { t } = useTranslation();
@@ -29,7 +21,6 @@ export default function ResultsPage() {
   useEffect(() => {
     const fetchResult = async () => {
       if (!id) return;
-
       setIsLoading(true);
       setError(null);
 
@@ -52,7 +43,6 @@ export default function ResultsPage() {
 
   const handleDownloadPdf = async () => {
     if (!id) return;
-
     setIsDownloading(true);
     try {
       await macroService.downloadPdf(id);
@@ -63,41 +53,24 @@ export default function ResultsPage() {
     }
   };
 
-  // Calculate macro percentages
-  const calculatePercentages = (protein: number, carbs: number, fats: number) => {
-    const proteinCals = protein * 4;
-    const carbsCals = carbs * 4;
-    const fatsCals = fats * 9;
-    const total = proteinCals + carbsCals + fatsCals;
-
-    return {
-      protein: Math.round((proteinCals / total) * 100),
-      carbs: Math.round((carbsCals / total) * 100),
-      fats: Math.round((fatsCals / total) * 100),
-    };
-  };
-
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-12 h-12 text-emerald-400 animate-spin" />
-          <p className="text-slate-400">{t('history.loading')}</p>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
       </div>
     );
   }
 
   if (error || !result) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-400 text-xl mb-4">{error || t('errors.notFound')}</div>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center max-w-sm">
+          <p className="text-sm text-error mb-4">{error || t('errors.notFound')}</p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 h-9 px-4 bg-accent text-background text-sm font-medium rounded-md hover:bg-accent-muted transition-colors"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
             {t('app.newCalculation')}
           </Link>
         </div>
@@ -105,218 +78,180 @@ export default function ResultsPage() {
     );
   }
 
-  const percentages = calculatePercentages(result.protein, result.carbs, result.fats);
+  // Calculate percentages
+  const proteinCals = result.protein * 4;
+  const carbsCals = result.carbs * 4;
+  const fatsCals = result.fats * 9;
+  const totalCals = proteinCals + carbsCals + fatsCals;
+  const pct = {
+    protein: Math.round((proteinCals / totalCals) * 100),
+    carbs: Math.round((carbsCals / totalCals) * 100),
+    fats: Math.round((fatsCals / totalCals) * 100),
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="py-6 px-8 border-b border-white/10">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="p-2 bg-emerald-500/20 rounded-xl">
-              <Calculator className="w-6 h-6 text-emerald-400" />
-            </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-              {t('app.title')}
-            </h1>
+      <header className="border-b border-border-subtle">
+        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+          <Link to="/" className="text-sm font-semibold text-text-primary tracking-tight">
+            MacroApp
           </Link>
-
-          <nav className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-1">
             <Link
               to="/"
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+              className="h-8 px-3 flex items-center gap-1.5 rounded-md text-sm text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('app.newCalculation')}</span>
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">New</span>
             </Link>
             <Link
               to="/history"
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+              className="h-8 px-3 flex items-center gap-1.5 rounded-md text-sm text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors"
             >
-              <History className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('app.history')}</span>
+              <History className="w-3.5 h-3.5" />
             </Link>
             <LanguageSwitcher />
             <button
               onClick={handleDownloadPdf}
               disabled={isDownloading}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl transition-colors"
+              className={cn(
+                "h-8 px-3 flex items-center gap-1.5 rounded-md text-sm font-medium",
+                "bg-accent text-background hover:bg-accent-muted transition-colors",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
             >
               {isDownloading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <Download className="w-4 h-4" />
+                <Download className="w-3.5 h-3.5" />
               )}
-              <span className="hidden sm:inline">PDF</span>
+              PDF
             </button>
-          </nav>
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 py-12 px-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Hero Section */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">
-              {t('results.title')}
-              <span className="block bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                {t('results.macroPlan')}
-              </span>
-            </h2>
-            <p className="text-slate-400">
-              {t('results.basedOn')}
-            </p>
-          </div>
-
-          {/* BMR & TDEE Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 p-6 flex items-center gap-4">
-              <div className="p-3 bg-orange-500/20 rounded-xl">
-                <Flame className="w-8 h-8 text-orange-400" />
-              </div>
+      {/* Main Dashboard */}
+      <main className="flex-1 py-6 px-4">
+        <div className="max-w-2xl mx-auto space-y-4">
+          
+          {/* Primary: Daily Calories */}
+          <div className="bg-surface border border-border-subtle rounded-lg p-5">
+            <div className="flex items-start justify-between mb-4">
               <div>
-                <div className="text-sm text-slate-400">{t('results.bmr')}</div>
-                <div className="text-2xl font-bold text-white">
-                  {result.bmr} <span className="text-sm text-slate-500">{t('results.kcal')}</span>
+                <p className="text-xs text-text-muted uppercase tracking-wide mb-1">
+                  {t('results.dailyTargets')}
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-text-primary text-data-lg">
+                    {result.dailyCalories}
+                  </span>
+                  <span className="text-sm text-text-muted">kcal/day</span>
                 </div>
-                <div className="text-xs text-slate-500">{t('results.bmrDesc')}</div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-text-muted mb-1">{t('results.bmr')}</p>
+                <p className="text-sm text-text-secondary tabular-nums">{result.bmr}</p>
+                <p className="text-xs text-text-muted mt-2 mb-1">{t('results.tdee')}</p>
+                <p className="text-sm text-text-secondary tabular-nums">{result.tdee}</p>
               </div>
             </div>
 
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 p-6 flex items-center gap-4">
-              <div className="p-3 bg-cyan-500/20 rounded-xl">
-                <Activity className="w-8 h-8 text-cyan-400" />
-              </div>
-              <div>
-                <div className="text-sm text-slate-400">{t('results.tdee')}</div>
-                <div className="text-2xl font-bold text-white">
-                  {result.tdee} <span className="text-sm text-slate-500">{t('results.kcal')}</span>
-                </div>
-                <div className="text-xs text-slate-500">{t('results.tdeeDesc')}</div>
-              </div>
+            {/* Macro Distribution Bar */}
+            <div className="h-2 rounded-full overflow-hidden flex bg-surface-muted">
+              <div
+                className="h-full bg-protein transition-all duration-500"
+                style={{ width: `${pct.protein}%` }}
+              />
+              <div
+                className="h-full bg-carbs transition-all duration-500"
+                style={{ width: `${pct.carbs}%` }}
+              />
+              <div
+                className="h-full bg-fats transition-all duration-500"
+                style={{ width: `${pct.fats}%` }}
+              />
             </div>
           </div>
 
-          {/* Main Macros Section */}
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
-            <h3 className="text-xl font-semibold mb-6 text-center">{t('results.dailyTargets')}</h3>
-
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              {/* Calorie Ring */}
-              <div className="flex-shrink-0">
-                <CalorieRing
-                  calories={result.dailyCalories}
-                  protein={result.protein}
-                  carbs={result.carbs}
-                  fats={result.fats}
-                />
-              </div>
-
-              {/* Macro Cards */}
-              <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-                <MacroCard
-                  label={t('results.protein')}
-                  value={result.protein}
-                  unit="g"
-                  color="indigo"
-                  percentage={percentages.protein}
-                />
-                <MacroCard
-                  label={t('results.carbs')}
-                  value={result.carbs}
-                  unit="g"
-                  color="amber"
-                  percentage={percentages.carbs}
-                />
-                <MacroCard
-                  label={t('results.fats')}
-                  value={result.fats}
-                  unit="g"
-                  color="rose"
-                  percentage={percentages.fats}
-                />
-              </div>
-            </div>
-
-            {/* Macro Legend */}
-            <div className="flex justify-center gap-6 mt-6 pt-6 border-t border-slate-700/50">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-indigo-500" />
-                <span className="text-sm text-slate-400">{t('results.protein')} (4 cal/g)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-amber-500" />
-                <span className="text-sm text-slate-400">{t('results.carbs')} (4 cal/g)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-500" />
-                <span className="text-sm text-slate-400">{t('results.fats')} (9 cal/g)</span>
-              </div>
-            </div>
+          {/* Macro Breakdown */}
+          <div className="grid grid-cols-3 gap-3">
+            <MacroCard
+              label={t('results.protein')}
+              value={result.protein}
+              percentage={pct.protein}
+              color="protein"
+            />
+            <MacroCard
+              label={t('results.carbs')}
+              value={result.carbs}
+              percentage={pct.carbs}
+              color="carbs"
+            />
+            <MacroCard
+              label={t('results.fats')}
+              value={result.fats}
+              percentage={pct.fats}
+              color="fats"
+            />
           </div>
 
-          {/* Special Days Section */}
+          {/* Workout / Rest Day Adjustments */}
           {result.workoutDayCalories && result.restDayCalories && (
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-center">
-                {t('results.specialDays')}
-              </h3>
-              <p className="text-center text-slate-400 text-sm mb-6">
-                {t('results.specialDaysDesc')}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <SpecialDayCard
-                  type="workout"
-                  calories={result.workoutDayCalories}
-                  protein={result.workoutDayProtein!}
-                  carbs={result.workoutDayCarbs!}
-                  fats={result.workoutDayFats!}
-                />
-                <SpecialDayCard
-                  type="rest"
-                  calories={result.restDayCalories}
-                  protein={result.restDayProtein!}
-                  carbs={result.restDayCarbs!}
-                  fats={result.restDayFats!}
-                />
-              </div>
+            <div className="grid grid-cols-2 gap-3">
+              <DayCard
+                type="workout"
+                calories={result.workoutDayCalories}
+                protein={result.workoutDayProtein!}
+                carbs={result.workoutDayCarbs!}
+                fats={result.workoutDayFats!}
+              />
+              <DayCard
+                type="rest"
+                calories={result.restDayCalories}
+                protein={result.restDayProtein!}
+                carbs={result.restDayCarbs!}
+                fats={result.restDayFats!}
+              />
             </div>
           )}
 
-          {/* Tips Section */}
-          <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 rounded-2xl border border-emerald-500/20 p-6">
-            <h3 className="text-lg font-semibold mb-4 text-emerald-400">
-              💡 {t('results.proTips')}
-            </h3>
-            <ul className="space-y-2 text-slate-300 text-sm">
-              <li>• {t('results.tips.protein')}</li>
-              <li>• {t('results.tips.carbs')}</li>
-              <li>• {t('results.tips.fats')}</li>
-              <li>• {t('results.tips.hydration')}</li>
-              <li>• {t('results.tips.progress')}</li>
+          {/* Quick Tips */}
+          <div className="bg-surface border border-border-subtle rounded-lg p-4">
+            <p className="text-xs text-text-muted uppercase tracking-wide mb-3">
+              {t('results.proTips')}
+            </p>
+            <ul className="space-y-2 text-sm text-text-secondary">
+              <li className="flex items-start gap-2">
+                <ChevronRight className="w-3.5 h-3.5 text-text-muted mt-0.5 flex-shrink-0" />
+                <span>{t('results.tips.protein')}</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <ChevronRight className="w-3.5 h-3.5 text-text-muted mt-0.5 flex-shrink-0" />
+                <span>{t('results.tips.hydration')}</span>
+              </li>
             </ul>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
             <Link
               to="/"
-              className="flex items-center justify-center gap-2 px-8 py-4 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+              className="flex-1 h-10 flex items-center justify-center gap-2 rounded-md border border-border-default text-sm text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors"
             >
-              <RefreshCw className="w-5 h-5" />
+              <RefreshCw className="w-4 h-4" />
               {t('app.newCalculation')}
             </Link>
             <button
               onClick={handleDownloadPdf}
               disabled={isDownloading}
-              className="flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 disabled:opacity-50 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/25"
+              className="flex-1 h-10 flex items-center justify-center gap-2 rounded-md bg-accent text-background text-sm font-medium hover:bg-accent-muted transition-colors disabled:opacity-50"
             >
               {isDownloading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Download className="w-5 h-5" />
+                <Download className="w-4 h-4" />
               )}
               {t('results.downloadPdf')}
             </button>
@@ -325,9 +260,105 @@ export default function ResultsPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 px-8 border-t border-white/10 text-center text-slate-500 text-sm">
-        <p>{t('app.title')} — {t('app.subtitle')}</p>
+      <footer className="border-t border-border-subtle py-4 px-4">
+        <div className="max-w-3xl mx-auto flex items-center justify-between text-xs text-text-muted">
+          <span>© 2025 MacroApp</span>
+          <Link to="/history" className="hover:text-text-secondary transition-colors">
+            View history
+          </Link>
+        </div>
       </footer>
+    </div>
+  );
+}
+
+/* Inline Components for Dashboard */
+
+function MacroCard({
+  label,
+  value,
+  percentage,
+  color,
+}: {
+  label: string;
+  value: number;
+  percentage: number;
+  color: 'protein' | 'carbs' | 'fats';
+}) {
+  const colorClass = {
+    protein: 'text-protein',
+    carbs: 'text-carbs',
+    fats: 'text-fats',
+  }[color];
+
+  const bgClass = {
+    protein: 'bg-protein',
+    carbs: 'bg-carbs',
+    fats: 'bg-fats',
+  }[color];
+
+  return (
+    <div className="bg-surface border border-border-subtle rounded-lg p-4">
+      <p className="text-xs text-text-muted mb-1">{label}</p>
+      <div className="flex items-baseline gap-1 mb-3">
+        <span className={cn("text-2xl font-semibold text-data", colorClass)}>
+          {value}
+        </span>
+        <span className="text-xs text-text-muted">g</span>
+      </div>
+      <div className="h-1 rounded-full bg-surface-muted overflow-hidden">
+        <div
+          className={cn("h-full rounded-full transition-all duration-500", bgClass)}
+          style={{ width: `${percentage}%`, opacity: 0.8 }}
+        />
+      </div>
+      <p className="text-xs text-text-muted mt-1.5">{percentage}%</p>
+    </div>
+  );
+}
+
+function DayCard({
+  type,
+  calories,
+  protein,
+  carbs,
+  fats,
+}: {
+  type: 'workout' | 'rest';
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+}) {
+  const { t } = useTranslation();
+  const isWorkout = type === 'workout';
+
+  return (
+    <div className={cn(
+      "bg-surface border rounded-lg p-4",
+      isWorkout ? "border-accent/20" : "border-border-subtle"
+    )}>
+      <p className="text-xs text-text-muted mb-2">
+        {isWorkout ? t('results.workoutDay') : t('results.restDay')}
+      </p>
+      <p className="text-xl font-semibold text-text-primary text-data mb-3">
+        {calories}
+        <span className="text-xs text-text-muted font-normal ml-1">kcal</span>
+      </p>
+      <div className="grid grid-cols-3 gap-2 text-xs">
+        <div>
+          <span className="text-text-muted">P</span>
+          <span className="ml-1 text-text-secondary tabular-nums">{protein}g</span>
+        </div>
+        <div>
+          <span className="text-text-muted">C</span>
+          <span className="ml-1 text-text-secondary tabular-nums">{carbs}g</span>
+        </div>
+        <div>
+          <span className="text-text-muted">F</span>
+          <span className="ml-1 text-text-secondary tabular-nums">{fats}g</span>
+        </div>
+      </div>
     </div>
   );
 }
